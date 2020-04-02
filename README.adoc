@@ -21,7 +21,7 @@ In order to play this game, you only need to know one thing : *how to send ICX*
 
 `PLAYERS` : a record of players ( mapping between ICX addresses and deposit size )
 
-`MONEY_POT` : ICX hold by this lottery contract, also known as ICX balance of the contract minus a small amount reserved for fee payment
+`MONEY_POT` : total ICX deposited to this lottery contract, also known as ICX balance of the contract minus a small amount reserved for fee payment
 
 `LAST_SETTLEMENT_BH` : the height of block in which previous winner selection procedure was executed
 
@@ -69,7 +69,7 @@ For instance, assume `COMMISSION` is *5%*, we have
 
 4. For each player, the probability of being chosen as winner is proportional to the size of ICX deposit.
 
-5. Winner is chosen by a pseudo-random function with random seed composed of `TX_HASH` `+` `TIMESTAMP` ( string concatenation )
+5. Winner is chosen by a pseudo-random function with random seed composed of `TX_HASH` `+` `TIMESTAMP` `+` `number of PLAYERS` `+` `MONEY_POT` ( string concatenation )
 
 [[Fairness]]
 ## Fairness and transparency
