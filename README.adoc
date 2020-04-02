@@ -1,0 +1,98 @@
+# ICONVIET Lottery Lightpaper
+
+A very *simple* yet fun and *incentivized* lottery game on ICON blockchain network.
+
+Unlike other gamble or lottery Dapps, this game utilizes and features a *Probabilistic pseudorandom selection algorithm* in smart contract environment.
+
+In order to play this game, you only need to know one thing : *how to send ICX*
+
+<<Definitions>>
+
+<<Rule>>
+
+<<Fairness>>
+
+<<Roadmap>>
+
+[[Definitions]]
+## Definitions
+
+### Internal variables
+
+`PLAYERS` : a record of players ( mapping between ICX addresses and deposit size )
+
+`MONEY_POT` : ICX hold by this lottery contract, also known as ICX balance of the contract minus a small amount reserved for fee payment
+
+`LAST_SETTLEMENT_BH` : the height of block in which previous winner selection procedure was executed
+
+`TREASURY` : the fund reserved for future development, it is the address of an external multi-sig wallet controlled by ICONVIET
+
+`TOP_DEPOSIT` : highest recorded ICX amount transferred by a single player in current round
+
+### External variables
+
+`DEPOSIT_BH` : the height of block which contains the transaction of ICX deposit to this lottery contract by a certain player
+
+`TX_HASH` : the hash of winner selection transaction
+
+`TIMESTAMP` : the timestamp when winner selection transaction is created
+
+### Governance parameters
+
+`POT_LIMIT` : the limit of `MONEY_POT`, it helps to prevent huge loss in case of contract bug and hack
+
+`COMMISSION` : ICX amount in `MONEY_POT` to be tranferred to `TREASURY` after each round, in form of percentage, e.g. *5%*
+
+`DEPOSIT_SIZE_LIMIT` : limit of a new deposit in correlation with `TOP_DEPOSIT`, in form of percentage, e.g. *150%*
+
+[[Rule]]
+## Rule
+
+1. Players can send their ICX to the contract whenever thay want, sender's addresses are included in `PLAYERS` list of the contract. Here we have `NEW_DEPOSIT` as tranferred ICX amount
+
+- If `MONEY_POT` `+` `NEW_DEPOSIT` exceed `POT_LIMIT`, transaction will fail
+- Deposit size must not be greater than `DEPOSIT_SIZE_LIMIT` of `TOP_DEPOSIT` +
+This limit helps to avoid wealthy players having a huge probability of being chosen as winner
+
+2. When `select_winner` function of the contract is called by some `external_agent` ( contract cannot trigger itself )
+
+- There must be at least 2 players in current round
+- The settlement procedure is executed
+- The winner is chosen
+- `PLAYERS` record and other relevant variables are also reset
+- `COMMISSION` percentage of `MONEY_POT` is transferred to `TREASURY`, and the rest to the winner. +
+For instance, assume `COMMISSION` is *5%*, we have
+* *5%* of `MONEY_POT` is transferred to `TREASURY`
+* *95%* to the winner
+
+3. If `LAST_SETTLEMENT_BH` and `DEPOSIT_BH` is the same, and if ICX deposit transaction is executed after the winner selection transaction, that sender will be in `PLAYERS` list of the next round.
+
+4. For each player, the probability of being chosen as winner is proportional to the size of ICX deposit.
+
+5. Winner is chosen by a pseudo-random function with random seed composed of `TX_HASH` `+` `TIMESTAMP` ( string concatenation )
+
+[[Fairness]]
+## Fairness and transparency
+
+The winner selection procedure is
+
+- Based on pseudo-random function, hence no one is able to manipulate and game the system ( assume there is no bug )
+- Contract code is public and can be audited by anyone
+
+[[Roadmap]]
+## Roadmap and the role of ICONVIET
+
+### Phase 0
+
+- All governance parameters are set by ICONVIET, including
+* `POT_LIMIT` is *2000* ICX per day
+* `COMMISSION` is *5%*
+* `DEPOSIT_SIZE_LIMIT` is *150%*
+- Winner selection is triggered by ICONVIET for each 43200 blocks period
+- `TREASURY` is still a standard wallet
+
+This phase will last for at least one month, to keep bugs under control ( if any ), as well as gathering insights for further development.
+
+### Phase 1
+
+To be decided...
