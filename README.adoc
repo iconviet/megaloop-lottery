@@ -1,4 +1,4 @@
-# ICONVIET Lottery Lightpaper
+# ICONLOTT Lightpaper
 
 A very *simple* yet fun and *incentivized* lottery game on ICON blockchain network.
 
