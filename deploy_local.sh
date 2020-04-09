@@ -1,1 +1,1 @@
-venv/bin/tbears deploy -k local_wallet iconlott
+venv/bin/tbears deploy iconlott
