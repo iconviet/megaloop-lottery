@@ -1,0 +1,1 @@
+venv/bin/tbears deploy -k local_wallet -m update -o cx9202926ed0425011fbfad09215e1fed2cc9b53bb iconlott
