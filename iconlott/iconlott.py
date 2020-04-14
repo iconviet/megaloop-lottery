@@ -62,15 +62,12 @@ class IconLott(IconScoreBase):
     # Governance variables
 
     @external
-    def set_pot_limit(self, pot_limit: int) -> bool:
+    def set_pot_limit(self, pot_limit: int) -> None:
         """
         In `loop` unit, e.g `1000 * 10 ** 18` loops = `1000` ICX
         """
         if self.msg.sender == self.owner:
             self._pot_limit.set(pot_limit)
-            return True
-        else:
-            return False
 
     @external(readonly=True)
     def get_pot_limit(self) -> int:
@@ -80,16 +77,13 @@ class IconLott(IconScoreBase):
         return self._pot_limit.get()
 
     @external
-    def set_commission(self, commission: int) -> bool:
+    def set_commission(self, commission: int) -> None:
         """
         In percentage unit, e.g. `5` %
         """
 
         if self.msg.sender == self.owner:
             self._commission.set(commission)
-            return True
-        else:
-            return False
 
     @external(readonly=True)
     def get_commission(self) -> int:
@@ -99,16 +93,13 @@ class IconLott(IconScoreBase):
         return self._commission.get()
 
     @external
-    def set_deposit_size_limit(self, deposit_size_limit: int) -> bool:
+    def set_deposit_size_limit(self, deposit_size_limit: int) -> None:
         """
         In percentage unit, e.g. `150` %
         """
 
         if self.msg.sender == self.owner:
             self._deposit_size_limit.set(deposit_size_limit)
-            return True
-        else:
-            return False
 
     @external(readonly=True)
     def get_deposit_size_limit(self) -> int:
@@ -118,12 +109,9 @@ class IconLott(IconScoreBase):
         return self._deposit_size_limit.get()
 
     @external
-    def set_treasury(self, treasury_address: Address) -> bool:
+    def set_treasury(self, treasury_address: Address) -> None:
         if self.msg.sender == self.owner:
             self._treasury.set(treasury_address)
-            return True
-        else:
-            return False
 
     @external(readonly=True)
     def get_treasury(self) -> Address:
