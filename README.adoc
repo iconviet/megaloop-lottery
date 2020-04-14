@@ -21,11 +21,9 @@ In order to play this game, you only need to know one thing : *how to send ICX*
 
 `PLAYERS` : a record of players ( mapping between ICX addresses and deposit size )
 
-`MONEY_POT` : total ICX deposited to this lottery contract, also known as ICX balance of the contract minus a small amount reserved for fee payment
+`MONEY_POT` : record of total ICX deposited to this lottery contract, also known as ICX balance of the contract minus a small amount reserved for fee payment
 
 `LAST_SETTLEMENT_BH` : the height of block in which previous winner selection procedure was executed
-
-`TREASURY` : the fund reserved for future development, it is the address of an external multi-sig wallet controlled by ICONVIET
 
 `TOP_DEPOSIT` : highest recorded ICX amount transferred by a single player in current round
 
@@ -44,6 +42,8 @@ In order to play this game, you only need to know one thing : *how to send ICX*
 `COMMISSION` : ICX amount in `MONEY_POT` to be tranferred to `TREASURY` after each round, in form of percentage, e.g. *5%*
 
 `DEPOSIT_SIZE_LIMIT` : limit of a new deposit in correlation with `TOP_DEPOSIT`, in form of percentage, e.g. *150%*
+
+`TREASURY` : the fund reserved for future development, it is the address of an external multi-sig wallet controlled by ICONVIET
 
 [[Rule]]
 ## Rule
