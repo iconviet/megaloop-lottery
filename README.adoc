@@ -33,7 +33,7 @@ In order to play this game, you only need to know one thing : *how to send ICX*
 
 `TX_HASH` : the hash of winner selection transaction
 
-`TIMESTAMP` : the timestamp when winner selection transaction is created
+`TIMESTAMP` : the timestamp of block contains winner selection transaction
 
 ### Governance parameters
 
