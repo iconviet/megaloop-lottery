@@ -1,6 +1,6 @@
 from iconservice import *
 
-TAG = 'IconLottery'
+TAG = 'IconvietLottery'
 
 DEFAULT_POT_LIMIT = 2000 * 10 ** 18  # 2000 ICX
 DEFAULT_COMMISSION = 5  # 5%
@@ -12,7 +12,9 @@ class IconLott(IconScoreBase):
     Lightpaper: https://github.com/duyyudus/icon-lottery
     """
 
-    BUFFER_FUND = 100 * 10 ** 18  # 100 ICX
+    _SCORE_NAME = 'ICONVIET Probabilistic Lottery'
+
+    BUFFER_FUND = 5 * 10 ** 18  # 5 ICX
 
     # Round-wise
     _PLAYERS = 'players'
@@ -20,8 +22,9 @@ class IconLott(IconScoreBase):
     _MONEY_POT = 'money_pot'
     _TOP_DEPOSIT = 'top_deposit'
 
-    # Persistent
+    # History
     _LAST_SETTLEMENT_BH = 'last_settlement_bh'
+    _LAST_WINNER = 'last_winner'
 
     # Governance variables
     _POT_LIMIT = 'pot_limit'
@@ -45,6 +48,7 @@ class IconLott(IconScoreBase):
         self._top_deposit = VarDB(self._TOP_DEPOSIT, db, value_type=int)
 
         self._last_settlement_bh = VarDB(self._LAST_SETTLEMENT_BH, db, value_type=int)
+        self._last_winner = VarDB(self._LAST_WINNER, db, value_type=Address)
 
         self._pot_limit = VarDB(self._POT_LIMIT, db, value_type=int)
         self._commission = VarDB(self._COMMISSION, db, value_type=int)
@@ -65,6 +69,10 @@ class IconLott(IconScoreBase):
 
     def on_update(self) -> None:
         super().on_update()
+
+    @external(readonly=True)
+    def name(self) -> str:
+        return self._SCORE_NAME
 
     ###############################################################################################
     # Governance variables
@@ -131,9 +139,13 @@ class IconLott(IconScoreBase):
     ###############################################################################################
     # Deposit and money pot
 
-    @external
+    @external(readonly=True)
     def money_pot_balance(self) -> int:
         return self._money_pot.get()
+
+    @external(readonly=True)
+    def get_top_deposit(self) -> int:
+        return self._top_deposit.get()
 
     @payable
     def fallback(self):
@@ -179,7 +191,7 @@ class IconLott(IconScoreBase):
     ###############################################################################################
 
     ###############################################################################################
-    # Select winner
+    # Draw winner
 
     def _new_round(self) -> None:
         self._money_pot.set(0)
@@ -214,7 +226,9 @@ class IconLott(IconScoreBase):
 
     @external
     def select_winner(self) -> None:
-        if len(self._players) < 2:
+        if self.msg.sender != self.owner:
+            revert('Only contract owner is allowed to select winner')
+        elif len(self._players) < 2:
             revert('There must be at least 2 players in current round')
         elif not self._money_pot.get() > 0:
             revert('Money pot must be greater than zero')
@@ -231,20 +245,29 @@ class IconLott(IconScoreBase):
                 f'Not enough fund in the contract. Balance is {contract_balance/10**18} ICX, require {required/10**18} ICX'
             )
 
-        weights = [self._players_record[i] / money_pot for i in self._players]
-        winner_id = self._weighted_random(weights)
-        if winner_id is not None:
-            winner_address = self._players.get(winner_id)
-            self.icx.transfer(winner_address, winner_value)
-            self.WinnerFundTransfer(winner_address, winner_value)
+        try:
+            weights = [self._players_record[i] / money_pot for i in self._players]
+            winner_id = self._weighted_random(weights)
+            if winner_id is not None:
+                winner_address = self._players.get(winner_id)
+                self.icx.transfer(winner_address, winner_value)
+                # self.WinnerFundTransfer(winner_address, winner_value)
+                self._last_winner.set(winner_address)
 
-        treasury_address = self._treasury.get()
-        if treasury_address is not None:
-            self.icx.transfer(treasury_address, commission_value)
-            self.TreasuryFundTransfer(commission_value)
+            treasury_address = self._treasury.get()
+            if treasury_address is not None:
+                self.icx.transfer(treasury_address, commission_value)
+                # self.TreasuryFundTransfer(commission_value)
 
-        # New game
-        self._new_round()
+            # New game
+            self._new_round()
+
+        except Exception as e:
+            revert(f'Failed to draw winner due to error: {str(e)}')
+
+    @external(readonly=True)
+    def get_last_winner(self) -> Address:
+        return self._last_winner.get()
 
     # End of select winner
     ###############################################################################################

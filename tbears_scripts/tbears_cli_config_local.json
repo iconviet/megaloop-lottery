@@ -1,5 +1,5 @@
 {
-    "uri": "http://127.0.0.1:9000/api/v3",
+    "uri": "http://45.32.109.194:9000/api/v3",
     "nid": "0x3",
     "keyStore": "./local_wallet",
     "password": "test1_Account",

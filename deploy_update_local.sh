@@ -1,1 +1,0 @@
-venv/bin/tbears deploy -m update -o cx9202926ed0425011fbfad09215e1fed2cc9b53bb iconlott

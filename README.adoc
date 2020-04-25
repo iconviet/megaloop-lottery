@@ -25,6 +25,8 @@ In order to play this game, you only need to know one thing : *how to send ICX*
 
 `LAST_SETTLEMENT_BH` : the height of block in which previous winner selection procedure was executed
 
+`LAST_WINNER` : address of the winner in previous round
+
 `TOP_DEPOSIT` : highest recorded ICX amount transferred by a single player in current round
 
 ### External variables

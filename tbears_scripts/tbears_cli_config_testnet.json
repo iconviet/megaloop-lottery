@@ -1,0 +1,15 @@
+{
+    "uri": "https://bicon.net.solidwallet.io/api/v3",
+    "nid": "0x3",
+    "keyStore": "./testnet_wallet",
+    "password": "",
+    "from": "hxfafe76ab475a06b184587695327e72c04b4566a4",
+    "to": "cx0000000000000000000000000000000000000000",
+    "deploy": {
+        "mode": "install",
+        "scoreParams": {}
+    },
+    "stepLimit": "0x9502f900",
+    "txresult": {},
+    "transfer": {}
+}
