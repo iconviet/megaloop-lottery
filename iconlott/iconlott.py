@@ -31,6 +31,7 @@ class IconLott(IconScoreBase):
     _COMMISSION = 'commission'
     _DEPOSIT_SIZE_LIMIT = 'deposit_size_limit'
     _TREASURY = 'treasury'
+    _ENABLED = 'enabled'
 
     @eventlog
     def WinnerFundTransfer(self, player: Address, amount: int):
@@ -54,6 +55,7 @@ class IconLott(IconScoreBase):
         self._commission = VarDB(self._COMMISSION, db, value_type=int)
         self._deposit_size_limit = VarDB(self._DEPOSIT_SIZE_LIMIT, db, value_type=int)
         self._treasury = VarDB(self._TREASURY, db, value_type=Address)
+        self._enabled = VarDB(self._ENABLED, db, value_type=bool)
 
     def on_install(self) -> None:
         super().on_install()
@@ -66,6 +68,7 @@ class IconLott(IconScoreBase):
         self._pot_limit.set(DEFAULT_POT_LIMIT)
         self._commission.set(DEFAULT_COMMISSION)
         self._deposit_size_limit.set(DEFAULT_DEPOSIT_SIZE_LIMIT)
+        self._enabled.set(True)
 
     def on_update(self) -> None:
         super().on_update()
@@ -133,6 +136,15 @@ class IconLott(IconScoreBase):
     def get_treasury(self) -> Address:
         return self._treasury.get()
 
+    @external
+    def enable_contract(self, enabled: bool) -> None:
+        if self.msg.sender == self.owner:
+            self._enabled.set(enabled)
+
+    @external(readonly=True)
+    def is_enabled(self) -> bool:
+        return self._enabled.get()
+
     # End of governance variables
     ###############################################################################################
 
@@ -155,6 +167,8 @@ class IconLott(IconScoreBase):
         if self.msg.sender == self.owner:
             # Always receive ICX from owner wallet
             pass
+        elif not self._enabled.get():
+            revert('Lottery contract is currently disabled')
         elif self.msg.sender in self._players:
             revert(f'{self.msg.sender} is already in player list')
         elif self.msg.value + self._money_pot.get() > self._pot_limit.get():
@@ -203,14 +217,9 @@ class IconLott(IconScoreBase):
 
     def _random(self) -> float:
         """
-        Generate a random number in range [0, 1) from `TX_HASH` + `TIMESTAMP` + `len(PLAYERS)` + `MONEY_POT`
+        Generate a random number in range [0, 1) from `TX_HASH` + `len(PLAYERS)` + `MONEY_POT`
         """
-        seed = (
-            str(bytes.hex(self.tx.hash))
-            + str(self.now)
-            + str(len(self._players))
-            + str(self._money_pot.get())
-        )
+        seed = str(bytes.hex(self.tx.hash)) + str(len(self._players)) + str(self._money_pot.get())
         rand = int.from_bytes(sha3_256(seed.encode()), 'big') % 100000
         return rand / 100000.0
 
@@ -251,13 +260,13 @@ class IconLott(IconScoreBase):
             if winner_id is not None:
                 winner_address = self._players.get(winner_id)
                 self.icx.transfer(winner_address, winner_value)
-                # self.WinnerFundTransfer(winner_address, winner_value)
+                self.WinnerFundTransfer(winner_address, winner_value)
                 self._last_winner.set(winner_address)
 
             treasury_address = self._treasury.get()
             if treasury_address is not None:
                 self.icx.transfer(treasury_address, commission_value)
-                # self.TreasuryFundTransfer(commission_value)
+                self.TreasuryFundTransfer(commission_value)
 
             # New game
             self._new_round()
