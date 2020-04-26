@@ -35,8 +35,6 @@ In order to play this game, you only need to know one thing : *how to send ICX*
 
 `TX_HASH` : the hash of winner selection transaction
 
-`TIMESTAMP` : the timestamp of block contains winner selection transaction
-
 ### Governance parameters
 
 `POT_LIMIT` : the limit of `MONEY_POT`, it helps to prevent huge loss in case of contract bug and hack
@@ -71,7 +69,7 @@ For instance, assume `COMMISSION` is *5%*, we have
 
 4. For each player, the probability of being chosen as winner is proportional to the size of ICX deposit.
 
-5. Winner is chosen by a pseudo-random function with random seed composed of `TX_HASH` `+` `TIMESTAMP` `+` `number of PLAYERS` `+` `MONEY_POT` ( string concatenation )
+5. Winner is chosen by a pseudo-random function with random seed composed of `TX_HASH` `+` `number of PLAYERS` `+` `MONEY_POT` ( string concatenation )
 
 [[Fairness]]
 ## Fairness and transparency
