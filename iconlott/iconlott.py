@@ -2,8 +2,9 @@ from iconservice import *
 
 TAG = 'IconvietLottery'
 
+DEFAULT_SUBSIDY_RATE = 50  # 50%
 DEFAULT_POT_LIMIT = 2000 * 10 ** 18  # 2000 ICX
-DEFAULT_COMMISSION = 5  # 5%
+DEFAULT_COMMISSION = 0  # 0%, no commission
 DEFAULT_DEPOSIT_SIZE_LIMIT = 150  # 150%
 
 
@@ -27,6 +28,7 @@ class IconLott(IconScoreBase):
     _LAST_WINNER = 'last_winner'
 
     # Governance variables
+    _SUBSIDY_RATE = 'subsidy_rate'
     _POT_LIMIT = 'pot_limit'
     _COMMISSION = 'commission'
     _DEPOSIT_SIZE_LIMIT = 'deposit_size_limit'
@@ -34,7 +36,7 @@ class IconLott(IconScoreBase):
     _ENABLED = 'enabled'
 
     @eventlog
-    def WinnerFundTransfer(self, player: Address, amount: int):
+    def WinnerRecord(self, winner_record: str):
         pass
 
     @eventlog
@@ -51,6 +53,7 @@ class IconLott(IconScoreBase):
         self._last_settlement_bh = VarDB(self._LAST_SETTLEMENT_BH, db, value_type=int)
         self._last_winner = VarDB(self._LAST_WINNER, db, value_type=Address)
 
+        self._subsidy_rate = VarDB(self._SUBSIDY_RATE, db, value_type=int)
         self._pot_limit = VarDB(self._POT_LIMIT, db, value_type=int)
         self._commission = VarDB(self._COMMISSION, db, value_type=int)
         self._deposit_size_limit = VarDB(self._DEPOSIT_SIZE_LIMIT, db, value_type=int)
@@ -65,6 +68,7 @@ class IconLott(IconScoreBase):
 
         self._last_settlement_bh.set(0)
 
+        self._subsidy_rate.set(DEFAULT_SUBSIDY_RATE)
         self._pot_limit.set(DEFAULT_POT_LIMIT)
         self._commission.set(DEFAULT_COMMISSION)
         self._deposit_size_limit.set(DEFAULT_DEPOSIT_SIZE_LIMIT)
@@ -73,12 +77,32 @@ class IconLott(IconScoreBase):
     def on_update(self) -> None:
         super().on_update()
 
+        self._subsidy_rate.set(DEFAULT_SUBSIDY_RATE)
+        self._pot_limit.set(DEFAULT_POT_LIMIT)
+        self._commission.set(DEFAULT_COMMISSION)
+        self._deposit_size_limit.set(DEFAULT_DEPOSIT_SIZE_LIMIT)
+
     @external(readonly=True)
     def name(self) -> str:
         return self._SCORE_NAME
 
     ###############################################################################################
     # Governance variables
+
+    @external
+    def set_subsidy_rate(self, subsidy_rate: int) -> None:
+        """
+        In percentage unit, e.g. `50` %
+        """
+        if self.msg.sender == self.owner:
+            self._subsidy_rate.set(subsidy_rate)
+
+    @external(readonly=True)
+    def get_subsidy_rate(self) -> int:
+        """
+        In percentage unit, e.g. `50` %
+        """
+        return self._subsidy_rate.get()
 
     @external
     def set_pot_limit(self, pot_limit: int) -> None:
@@ -177,12 +201,14 @@ class IconLott(IconScoreBase):
             revert('Failed due to current block contains winner selection transaction')
         elif self.msg.value == 0:
             revert('Zero deposit is not allowed')
-        elif self._top_deposit.get() > 0:
-            limit = self._deposit_size_limit.get()
-            if self.msg.value > limit * self._top_deposit.get() / 100:
-                revert(
-                    f'Deposit size must not be {limit}% greater than top deposit recorded in current round, which is {self._top_deposit.get()/10**18} ICX'
-                )
+
+        # Temporarily disable DEPOSIT SIZE LIMIT check
+        # elif self._top_deposit.get() > 0:
+        #     limit = self._deposit_size_limit.get()
+        #     if self.msg.value > limit * self._top_deposit.get() / 100:
+        #         revert(
+        #             f'Deposit size must not be {limit}% greater than top deposit recorded in current round, which is {self._top_deposit.get()/10**18} ICX'
+        #         )
 
         if self.msg.sender != self.owner:
             try:
@@ -234,7 +260,7 @@ class IconLott(IconScoreBase):
                 return i
 
     @external
-    def select_winner(self) -> None:
+    def draw_winner(self) -> None:
         if self.msg.sender != self.owner:
             revert('Only contract owner is allowed to select winner')
         elif len(self._players) < 2:
@@ -246,8 +272,10 @@ class IconLott(IconScoreBase):
         commission = self._commission.get()
 
         winner_value = (100 - commission) * money_pot // 100
+        subsidized_winner_value = winner_value + winner_value * self._subsidy_rate.get() // 100
         commission_value = commission * money_pot // 100
-        required = winner_value + commission_value + self.BUFFER_FUND
+
+        required = subsidized_winner_value + commission_value + self.BUFFER_FUND
         contract_balance = self.icx.get_balance(self.address)
         if contract_balance < required:
             revert(
@@ -259,12 +287,13 @@ class IconLott(IconScoreBase):
             winner_id = self._weighted_random(weights)
             if winner_id is not None:
                 winner_address = self._players.get(winner_id)
-                self.icx.transfer(winner_address, winner_value)
-                self.WinnerFundTransfer(winner_address, winner_value)
+                self.icx.transfer(winner_address, subsidized_winner_value)
+                winner_record = f'Winner: {winner_address} | Prize: {winner_value/10**18} ICX | Final prize with subsidy: {subsidized_winner_value/10**18} ICX'
+                self.WinnerRecord(winner_record)
                 self._last_winner.set(winner_address)
 
             treasury_address = self._treasury.get()
-            if treasury_address is not None:
+            if treasury_address is not None and commission_value > 0:
                 self.icx.transfer(treasury_address, commission_value)
                 self.TreasuryFundTransfer(commission_value)
 

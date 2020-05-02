@@ -37,11 +37,14 @@ In order to play this game, you only need to know one thing : *how to send ICX*
 
 ### Governance parameters
 
+`SUBSIDY_RATE`: determine the amount of ICX held in the contract for subsidizing the final prize, in form of percentage. Formula below
+
+[source]
+FINAL_PRIZE = MONEY_POT_AFTER_COMMISSION + MONEY_POT_AFTER_COMMISSION * SUBSIDY_RATE / 100
+
 `POT_LIMIT` : the limit of `MONEY_POT`, it helps to prevent huge loss in case of contract bug and hack
 
 `COMMISSION` : ICX amount in `MONEY_POT` to be tranferred to `TREASURY` after each round, in form of percentage, e.g. *5%*
-
-`DEPOSIT_SIZE_LIMIT` : limit of a new deposit in correlation with `TOP_DEPOSIT`, in form of percentage, e.g. *150%*
 
 `TREASURY` : the fund reserved for future development, it is the address of an external multi-sig wallet controlled by ICONVIET
 
@@ -51,10 +54,8 @@ In order to play this game, you only need to know one thing : *how to send ICX*
 1. Players can send their ICX to the contract whenever thay want, sender's addresses are included in `PLAYERS` list of the contract. Here we have `NEW_DEPOSIT` as tranferred ICX amount
 
 - If `MONEY_POT` `+` `NEW_DEPOSIT` exceed `POT_LIMIT`, transaction will fail
-- Deposit size must not be greater than `DEPOSIT_SIZE_LIMIT` of `TOP_DEPOSIT` +
-This limit helps to avoid wealthy players having a huge probability of being chosen as winner
 
-2. When `select_winner` function of the contract is called by some `external_agent` ( contract cannot trigger itself )
+2. When `draw_winner` function of the contract is called by some `external_agent` ( contract cannot trigger itself )
 
 - There must be at least 2 players in current round
 - The settlement procedure is executed
@@ -85,9 +86,9 @@ The winner selection procedure is
 ### Phase 0
 
 - All governance parameters are set by ICONVIET, including
+* `SUBSIDY_RATE` is *50%*, funded by ICONVIET
 * `POT_LIMIT` is *2000* ICX per day
-* `COMMISSION` is *5%*
-* `DEPOSIT_SIZE_LIMIT` is *150%*
+* `COMMISSION` is *0%*
 - Winner selection is triggered by ICONVIET for each 43200 blocks period
 - `TREASURY` is still a standard wallet
 
