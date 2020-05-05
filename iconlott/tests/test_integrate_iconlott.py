@@ -10,7 +10,7 @@ DIR_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 class TestTest(IconIntegrateTestBase):
-    TEST_HTTP_ENDPOINT_URI_V3 = "http://127.0.0.1:9000/api/v3"
+    TEST_HTTP_ENDPOINT_URI_V3 = "http://45.32.109.194:9000/api/v3"
     SCORE_PROJECT= os.path.abspath(os.path.join(DIR_PATH, '..'))
 
     def setUp(self):
