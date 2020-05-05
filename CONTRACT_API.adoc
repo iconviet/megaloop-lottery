@@ -25,44 +25,27 @@ POST Request
     }
 }
 
-## Read-only SCORE external functions
+## External functions and sample return
 
-### get_max_subsidy
+<<get_jackpot_size>>
 
-Get current subsidy amount set by ICONVIET
+<<get_max_subsidy>>
 
-*Return*
-[source]
-{
-    "jsonrpc": "2.0",
-    "result": "0x3635c9adc5dea00000", // Please convert hex value to integer, in this case is 1000 ICX
-    "id": 1234
-}
+<<get_pot_limit>>
 
-### get_pot_limit
+<<get_commission>>
 
-Jackpot size limit
+<<get_top_deposit>>
 
-*Return*
-[source]
-{
-    "jsonrpc": "2.0",
-    "result": "0x6c6b935b8bbd400000", // 2000 ICX
-    "id": 1234
-}
+<<ls_players>>
 
-### get_commission
+<<get_last_winner>>
 
-Commission the contract will take for each winner drawing, in percentage of jackpot
+<<get_last_settlement_bh>>
 
-*Return*
-[source]
-{
-    "jsonrpc": "2.0",
-    "result": "0x0", // 0 %
-    "id": 1234
-}
+<<get_last_settlement_tx>>
 
+[[get_jackpot_size]]
 ### get_jackpot_size
 
 Get current jackpot size of ongoing round
@@ -75,6 +58,46 @@ Get current jackpot size of ongoing round
     "id": 1234
 }
 
+[[get_max_subsidy]]
+### get_max_subsidy
+
+Get current subsidy amount set by ICONVIET
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x3635c9adc5dea00000", // Please convert hex value to integer, in this case is 1000 ICX
+    "id": 1234
+}
+
+[[get_pot_limit]]
+### get_pot_limit
+
+Jackpot size limit
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x6c6b935b8bbd400000", // 2000 ICX
+    "id": 1234
+}
+
+[[get_commission]]
+### get_commission
+
+Commission the contract will take for each winner drawing, in percentage of jackpot
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x0", // 0 %
+    "id": 1234
+}
+
+[[get_top_deposit]]
 ### get_top_deposit
 
 Get highest ICX deposit recorded in current round
@@ -87,6 +110,7 @@ Get highest ICX deposit recorded in current round
     "id": 1234
 }
 
+[[ls_players]]
 ### ls_players
 
 List of players in current round and their deposit
@@ -110,13 +134,41 @@ List of players in current round and their deposit
     "id": 1234
 }
 
+[[get_last_winner]]
 ### get_last_winner
 
 Address of the winner in previous round
 
+*Return*
 [source]
 {
     "jsonrpc": "2.0",
     "result": "hx4a8dfe91af82b5b162f0d6eb62427ad6576ccdee",
+    "id": 1234
+}
+
+[[get_last_settlement_bh]]
+### get_last_settlement_bh
+
+The height of block contains previous winner drawing transaction
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x989680",   // Block 10,000,000
+    "id": 1234
+}
+
+[[get_last_settlement_tx]]
+### get_last_settlement_tx
+
+Hash of previous winner drawing transaction
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0xa7936fbafc1653878ec04eb2dbf124915d7514aaf2bc447b81c37a319698bc98",
     "id": 1234
 }
