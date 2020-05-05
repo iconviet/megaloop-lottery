@@ -1,9 +1,9 @@
 from iconservice import *
 
-TAG = 'IconvietLottery'
+TAG = 'IconvietElegantLottery'
 
-DEFAULT_MAX_SUBSIDY = 1000 * 10 ** 18  # 1000 ICX
-DEFAULT_POT_LIMIT = 2000 * 10 ** 18  # 2000 ICX
+DEFAULT_MAX_SUBSIDY = 800 * 10 ** 18  # 800 ICX
+DEFAULT_POT_LIMIT = 1000 * 10 ** 18  # 1000 ICX
 DEFAULT_COMMISSION = 0  # 0%, no commission
 DEFAULT_DEPOSIT_SIZE_LIMIT = 150  # 150%
 
@@ -13,7 +13,7 @@ class IconLott(IconScoreBase):
     Lightpaper: https://github.com/duyyudus/icon-lottery
     """
 
-    _SCORE_NAME = 'ICONVIET Probabilistic Lottery'
+    _SCORE_NAME = 'ICONVIET Elegant Lottery'
 
     BUFFER_FUND = 5 * 10 ** 18  # 5 ICX
 
@@ -25,6 +25,7 @@ class IconLott(IconScoreBase):
 
     # History
     _LAST_SETTLEMENT_BH = 'last_settlement_bh'
+    _LAST_SETTLEMENT_TX = 'last_settlement_tx'
     _LAST_WINNER = 'last_winner'
 
     # Governance variables
@@ -52,6 +53,7 @@ class IconLott(IconScoreBase):
         self._top_deposit = VarDB(self._TOP_DEPOSIT, db, value_type=int)
 
         self._last_settlement_bh = VarDB(self._LAST_SETTLEMENT_BH, db, value_type=int)
+        self._last_settlement_tx = VarDB(self._LAST_SETTLEMENT_TX, db, value_type=str)
         self._last_winner = VarDB(self._LAST_WINNER, db, value_type=Address)
 
         self._non_players = ArrayDB(self._NON_PLAYERS, db, value_type=Address)
@@ -246,6 +248,7 @@ class IconLott(IconScoreBase):
         self._jackpot.set(0)
         self._top_deposit.set(0)
         self._last_settlement_bh.set(self.block_height)
+        self._last_settlement_tx.set(f'0x{bytes.hex(self.tx.hash)}')
 
         while len(self._players) > 0:
             self._players.pop()
@@ -323,6 +326,14 @@ class IconLott(IconScoreBase):
     def get_last_winner(self) -> Address:
         return self._last_winner.get()
 
+    @external(readonly=True)
+    def get_last_settlement_bh(self) -> int:
+        return self._last_settlement_bh.get()
+
+    @external(readonly=True)
+    def get_last_settlement_tx(self) -> str:
+        return self._last_settlement_tx.get()
+
     # End of select winner
     ###############################################################################################
 
@@ -331,7 +342,7 @@ class IconLott(IconScoreBase):
 
     @external(readonly=True)
     def about(self) -> str:
-        message = 'Welcome to ICONLOTT, a product of ICONVIET'
+        message = 'Welcome to the Elegant Lottery, a product of ICONVIET'
         return message
 
     @external(readonly=True)
