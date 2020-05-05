@@ -1,0 +1,122 @@
+# ICONVIET Lottery Contract API
+
+## Sample call
+
+Testnet endpoint: https://bicon.net.solidwallet.io/api/v3
+
+Mainnet endpoint: https://ctz.solidwallet.io/api/v3
+
+WARNING: Don't forget to remove all comments before sending
+
+POST Request
+[source]
+{
+    "jsonrpc": "2.0",
+    "method": "icx_call",
+    "id": 1234,
+    "params": {
+        "from": "hx077a0fb5efe377e2481ce97c8432969ec156ef1e", // TX sender address
+        "to": "cxa6ba8f0730ad952b5898ac3e5e90a17e20574eff",   // SCORE address
+        "dataType": "call",
+        "data": {
+            "method": "about", // SCORE external function
+            "params": {}
+        }
+    }
+}
+
+## Read-only SCORE external functions
+
+### get_max_subsidy
+
+Get current subsidy amount set by ICONVIET
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x3635c9adc5dea00000", // Please convert hex value to integer, in this case is 1000 ICX
+    "id": 1234
+}
+
+### get_pot_limit
+
+Jackpot size limit
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x6c6b935b8bbd400000", // 2000 ICX
+    "id": 1234
+}
+
+### get_commission
+
+Commission the contract will take for each winner drawing, in percentage of jackpot
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x0", // 0 %
+    "id": 1234
+}
+
+### get_jackpot_size
+
+Get current jackpot size of ongoing round
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x3bf3b91c95b00000", // 4.32 ICX
+    "id": 1234
+}
+
+### get_top_deposit
+
+Get highest ICX deposit recorded in current round
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0xcc47f20295c0000", // 0.92 ICX
+    "id": 1234
+}
+
+### ls_players
+
+List of players in current round and their deposit
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": {
+        "hx077a0fb5efe377e2481ce97c8432969ec156ef1e": "0x4b7ec32d7a20000",
+        "hx4a8dfe91af82b5b162f0d6eb62427ad6576ccdee": "0x39bb49f599a0000",
+        "hx4d191eaa1ef4d84caedc72b4a89cc9b1adb721b9": "0x4b7ec32d7a20000",
+        "hx2f1786fcca630339d5dda65acccf3cbc209a3a07": "0x39bb49f599a0000",
+        "hx7975363ff23c2d5d915dce15a31f9f441778a320": "0x89aaeb710be0000",
+        "hx3f90308cbef48815864b2a0cb0e0f5dd1f6cca63": "0x354a6ba7a180000",
+        "hx993451d131e702cdc401a987c3eb331651ee4899": "0x77e772392b60040",
+        "hx3c2671796c1972bd141a65d573de7d64f59dd6e6": "0xcc47f20295c0000",
+        "hxb64ee5dfa18c07ba1a960a17dbc5608d917d2153": "0x928ca80cfc20000",
+        "hx6e1aed6efb64bcf1e4ccbd48b3332e22366585fc": "0x7a1fe1602770040"
+    },
+    "id": 1234
+}
+
+### get_last_winner
+
+Address of the winner in previous round
+
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "hx4a8dfe91af82b5b162f0d6eb62427ad6576ccdee",
+    "id": 1234
+}
