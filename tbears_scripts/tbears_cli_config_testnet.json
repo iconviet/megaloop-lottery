@@ -9,7 +9,7 @@
         "mode": "install",
         "scoreParams": {}
     },
-    "stepLimit": "0x9502f900",
+    "stepLimit": "0x77359400",
     "txresult": {},
     "transfer": {}
 }
