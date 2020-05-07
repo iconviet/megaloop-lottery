@@ -15,14 +15,14 @@ with open('README.adoc') as readme_file:
     long_description = readme_file.read()
 
 setup(
-    name='icon_lottery',
+    name='megaloop_lottery',
     version='0.0.1',
-    description='A probabilistic lottery Dapp on ICON network',
+    description='A simple and incentived lottery Dapp on ICON network',
     long_description=long_description,
     long_description_content_type='text/asciidoc',
     author='duyyudus',
     author_email='duyyudus@gmail.com',
-    url='https://github.com/duyyudus/icon-lottery',
+    url='https://github.com/duyyudus/megaloop-lottery',
     include_package_data=True,
     tests_require=test_requires,
     install_requires=install_requires,
