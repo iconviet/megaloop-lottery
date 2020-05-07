@@ -1,19 +1,19 @@
 from iconservice import *
 
-TAG = 'IconvietElegantLottery'
+TAG = 'IconvietMegaloop'
 
-DEFAULT_MAX_SUBSIDY = 800 * 10 ** 18  # 800 ICX
+DEFAULT_MAX_SUBSIDY = 400 * 10 ** 18  # 400 ICX
 DEFAULT_POT_LIMIT = 1000 * 10 ** 18  # 1000 ICX
 DEFAULT_COMMISSION = 0  # 0%, no commission
 DEFAULT_DEPOSIT_SIZE_LIMIT = 150  # 150%
 
 
-class IconLott(IconScoreBase):
+class Megaloop(IconScoreBase):
     """
     Lightpaper: https://github.com/duyyudus/icon-lottery
     """
 
-    _SCORE_NAME = 'ICONVIET Elegant Lottery'
+    _SCORE_NAME = 'ICONVIET MEGALOOP'
 
     BUFFER_FUND = 5 * 10 ** 18  # 5 ICX
 
@@ -184,7 +184,7 @@ class IconLott(IconScoreBase):
     ###############################################################################################
 
     ###############################################################################################
-    # Deposit and money pot
+    # Deposit and jackpot
 
     @external(readonly=True)
     def get_jackpot_size(self) -> int:
@@ -204,12 +204,10 @@ class IconLott(IconScoreBase):
             pass
         elif not self._enabled.get():
             revert('Lottery contract is currently disabled')
-        elif self.msg.sender in self._players:
-            revert(f'{self.msg.sender} is already in player list')
         elif self.msg.value + self._jackpot.get() > self._pot_limit.get():
             revert(f'New deposit exceeds limit of money pot')
         elif self._last_settlement_bh.get() == self.block_height:
-            revert('Failed due to current block contains winner selection transaction')
+            revert('Failed due to current block contains winner drawing transaction')
         elif self.msg.value == 0:
             revert('Zero deposit is not allowed')
 
@@ -223,14 +221,20 @@ class IconLott(IconScoreBase):
 
         else:
             try:
-                self._players.put(self.msg.sender)
-                self._players_record[self.msg.sender] = self.msg.value
+                if self.msg.sender not in self._players:
+                    self._players.put(self.msg.sender)
+                    bet_size = self.msg.value
+                    self._players_record[self.msg.sender] = bet_size
+                else:
+                    current_amount = self._players_record[self.msg.sender]
+                    bet_size = current_amount + self.msg.value
+                    self._players_record[self.msg.sender] = bet_size
 
                 # New high record
-                if self.msg.value > self._top_deposit.get():
-                    self._top_deposit.set(self.msg.value)
+                if bet_size > self._top_deposit.get():
+                    self._top_deposit.set(bet_size)
 
-                # Update money pot
+                # Update jackpot
                 self._jackpot.set(self._jackpot.get() + self.msg.value)
 
                 message = f'Received {self.msg.value/10**18} ICX from {self.msg.sender}'
@@ -342,13 +346,17 @@ class IconLott(IconScoreBase):
 
     @external(readonly=True)
     def about(self) -> str:
-        message = 'Welcome to the Elegant Lottery, a product of ICONVIET'
+        message = 'Welcome to the MEGALOOP, a product of ICONVIET'
         return message
 
     @external(readonly=True)
     def ls_players(self) -> dict:
         players_record = {str(i): self._players_record[i] for i in self._players}
         return players_record
+
+    @external(readonly=True)
+    def get_player(self, address: Address) -> int:
+        return self._players_record[address] if address in self._players_record else 0
 
     # End of misc
     ###############################################################################################
