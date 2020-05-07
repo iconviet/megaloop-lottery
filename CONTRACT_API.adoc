@@ -1,4 +1,4 @@
-# ICONVIET Lottery Contract API
+# ICONVIET MEGALOOP Contract API
 
 ## Sample call
 
@@ -38,6 +38,8 @@ POST Request
 <<get_top_deposit>>
 
 <<ls_players>>
+
+<<get_player>>
 
 <<get_last_winner>>
 
@@ -131,6 +133,25 @@ List of players in current round and their deposit
         "hxb64ee5dfa18c07ba1a960a17dbc5608d917d2153": "0x928ca80cfc20000",
         "hx6e1aed6efb64bcf1e4ccbd48b3332e22366585fc": "0x7a1fe1602770040"
     },
+    "id": 1234
+}
+
+[[get_player]]
+### get_player
+
+Get deposit size of one specific player in current round
+
+*Params*
+[source]
+{
+    "address": "hx...." // Player address
+}
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "0x4b7ec32d7a20000",
     "id": 1234
 }
 

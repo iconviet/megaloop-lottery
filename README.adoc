@@ -1,4 +1,4 @@
-# ICONVIET Elegant Lottery - Lightpaper
+# ICONVIET MEGALOOP - Lightpaper
 
 A very *simple* yet fun and *incentivized* lottery game on ICON blockchain network.
 
@@ -6,7 +6,7 @@ Unlike other gamble or lottery Dapps, this game utilizes and features
 
 - *Very simple rule*, no multiple rounds running simultaneously, only one
 - *Subsidy funded by ICONVIET in launch phase*, which is very attractive and incentivizing early participants
-- *Probabilistic pseudorandom selection algorithm* in smart contract environment, which allows players taking greater risk with only one single big deposit, and rewards them accordingly as well.
+- *Probabilistic pseudorandom selection algorithm* in smart contract environment, which allows players taking greater risk with big bets, and rewards them accordingly as well.
 
 Given such simplicity, this game just needs a very simple UI to display a few neccessary information about on-going lottery round.
 
@@ -56,7 +56,7 @@ If you are interested in contract API, see link:CONTRACT_API.adoc[here]
 [[Rule]]
 ## Rule
 
-1. Players can send their ICX to the contract once per round, sender's addresses are included in `PLAYERS` list of the contract. Here we have `NEW_DEPOSIT` as tranferred ICX amount
+1. Players can send their ICX to the contract whenever they want, sender's addresses are included in `PLAYERS` list of the contract. Here we have `NEW_DEPOSIT` as tranferred ICX amount
 
 - If `JACKPOT` `+` `NEW_DEPOSIT` exceeds `POT_LIMIT`, transaction will fail
 
@@ -94,7 +94,7 @@ The winner selection procedure is
 ### Phase 0
 
 - All governance parameters are set by ICONVIET, including
-* `MAX_SUBSIDY` is *800* ICX, funded by ICONVIET
+* `MAX_SUBSIDY` is *400* ICX, funded by ICONVIET
 * `POT_LIMIT` is *1000* ICX per day
 * `COMMISSION` is *0%*
 - Winner selection is triggered by ICONVIET for approximately each 43200 blocks period ( daily )
