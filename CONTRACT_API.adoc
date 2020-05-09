@@ -56,7 +56,7 @@ Get current jackpot size of ongoing round
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "0x3bf3b91c95b00000", // 4.32 ICX
+    "result": "<int_digits_in_loops>", // For instance, "4320000...0000" is 4.32 ICX
     "id": 1234
 }
 
@@ -69,7 +69,7 @@ Get current subsidy amount set by ICONVIET
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "0x3635c9adc5dea00000", // Please convert hex value to integer, in this case is 1000 ICX
+    "result": "<int_digits_in_loops>",
     "id": 1234
 }
 
@@ -82,7 +82,7 @@ Jackpot size limit
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "0x6c6b935b8bbd400000", // 2000 ICX
+    "result": "<int_digits_in_loops>",
     "id": 1234
 }
 
@@ -95,7 +95,7 @@ Commission the contract will take for each winner drawing, in percentage of jack
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "0x0", // 0 %
+    "result": "<int_digits>", // "5" is 5 %
     "id": 1234
 }
 
@@ -108,7 +108,7 @@ Get highest ICX deposit recorded in current round
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "0xcc47f20295c0000", // 0.92 ICX
+    "result": "<int_digits_in_loops>",
     "id": 1234
 }
 
@@ -121,25 +121,19 @@ List of players in current round and their deposit
 [source]
 {
     "jsonrpc": "2.0",
-    "result": {
-        "hx077a0fb5efe377e2481ce97c8432969ec156ef1e": "0x4b7ec32d7a20000",
-        "hx4a8dfe91af82b5b162f0d6eb62427ad6576ccdee": "0x39bb49f599a0000",
-        "hx4d191eaa1ef4d84caedc72b4a89cc9b1adb721b9": "0x4b7ec32d7a20000",
-        "hx2f1786fcca630339d5dda65acccf3cbc209a3a07": "0x39bb49f599a0000",
-        "hx7975363ff23c2d5d915dce15a31f9f441778a320": "0x89aaeb710be0000",
-        "hx3f90308cbef48815864b2a0cb0e0f5dd1f6cca63": "0x354a6ba7a180000",
-        "hx993451d131e702cdc401a987c3eb331651ee4899": "0x77e772392b60040",
-        "hx3c2671796c1972bd141a65d573de7d64f59dd6e6": "0xcc47f20295c0000",
-        "hxb64ee5dfa18c07ba1a960a17dbc5608d917d2153": "0x928ca80cfc20000",
-        "hx6e1aed6efb64bcf1e4ccbd48b3332e22366585fc": "0x7a1fe1602770040"
-    },
+    "result": [
+        "hx94bd58b8073779e742d9e4c167ef8dc73a4406aa:691400000000000000:610401",
+        "hx7d2afae54e1c3fffb472108174bc92c8eec73d17:551400000000000000:610401",
+        ...
+        "<address>:<deposit_amount_in_loops>:<deposit_block_height>"
+    ],
     "id": 1234
 }
 
 [[get_player]]
 ### get_player
 
-Get deposit size of one specific player in current round
+Get record of one specific player in current round
 
 *Params*
 [source]
@@ -151,33 +145,33 @@ Get deposit size of one specific player in current round
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "0x4b7ec32d7a20000",
+    "result": "<address>:<deposit_amount>:<deposit_block_height>",
     "id": 1234
 }
 
 [[get_last_winner]]
 ### get_last_winner
 
-Address of the winner in previous round
+Record of the winner in previous round
 
 *Return*
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "hx4a8dfe91af82b5b162f0d6eb62427ad6576ccdee",
+    "result": "<address>:<deposit_size>:<total_prize_value>:<subsidy_value>",
     "id": 1234
 }
 
 [[get_last_player]]
 ### get_last_player
 
-Address of the latest player in current round
+Record of the latest player in current round
 
 *Return*
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "hx4a8dfe91af82b5b162f0d6eb62427ad6576ccdee",
+    "result": "<address>:<deposit_amount>:<deposit_block_height>",
     "id": 1234
 }
 
@@ -190,7 +184,7 @@ The height of block contains previous winner drawing transaction
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "0x989680",   // Block 10,000,000
+    "result": "<int_digits_of_block_height>",
     "id": 1234
 }
 

@@ -19,6 +19,7 @@ class Megaloop(IconScoreBase):
 
     # Round-wise
     _PLAYERS = 'players'
+    _PLAYERS_DEPOSIT = 'players_deposit'
     _PLAYERS_RECORD = 'players_record'
     _JACKPOT = 'jackpot'
     _TOP_DEPOSIT = 'top_deposit'
@@ -49,14 +50,15 @@ class Megaloop(IconScoreBase):
     def __init__(self, db: IconScoreDatabase) -> None:
         super().__init__(db)
         self._players = ArrayDB(self._PLAYERS, db, value_type=Address)
-        self._players_record = DictDB(self._PLAYERS_RECORD, db, value_type=int)
+        self._players_deposit = DictDB(self._PLAYERS_DEPOSIT, db, value_type=int)
+        self._players_record = DictDB(self._PLAYERS_RECORD, db, value_type=str)
         self._jackpot = VarDB(self._JACKPOT, db, value_type=int)
         self._top_deposit = VarDB(self._TOP_DEPOSIT, db, value_type=int)
         self._last_player = VarDB(self._LAST_PLAYER, db, value_type=Address)
 
         self._last_settlement_bh = VarDB(self._LAST_SETTLEMENT_BH, db, value_type=int)
         self._last_settlement_tx = VarDB(self._LAST_SETTLEMENT_TX, db, value_type=str)
-        self._last_winner = VarDB(self._LAST_WINNER, db, value_type=Address)
+        self._last_winner = VarDB(self._LAST_WINNER, db, value_type=str)
 
         self._non_players = ArrayDB(self._NON_PLAYERS, db, value_type=Address)
         self._max_subsidy = VarDB(self._MAX_SUBSIDY, db, value_type=int)
@@ -114,8 +116,8 @@ class Megaloop(IconScoreBase):
             self._max_subsidy.set(max_subsidy)
 
     @external(readonly=True)
-    def get_max_subsidy(self) -> int:
-        return self._max_subsidy.get()
+    def get_max_subsidy(self) -> str:
+        return str(self._max_subsidy.get())
 
     @external
     def set_pot_limit(self, pot_limit: int) -> None:
@@ -126,11 +128,11 @@ class Megaloop(IconScoreBase):
             self._pot_limit.set(pot_limit)
 
     @external(readonly=True)
-    def get_pot_limit(self) -> int:
+    def get_pot_limit(self) -> str:
         """
         In `loop` unit, e.g `1000 * 10 ** 18` loops = `1000` ICX
         """
-        return self._pot_limit.get()
+        return str(self._pot_limit.get())
 
     @external
     def set_commission(self, commission: int) -> None:
@@ -142,11 +144,11 @@ class Megaloop(IconScoreBase):
             self._commission.set(commission)
 
     @external(readonly=True)
-    def get_commission(self) -> int:
+    def get_commission(self) -> str:
         """
         In percentage unit, e.g. `5` %
         """
-        return self._commission.get()
+        return str(self._commission.get())
 
     @external
     def set_deposit_size_limit(self, deposit_size_limit: int) -> None:
@@ -158,11 +160,11 @@ class Megaloop(IconScoreBase):
             self._deposit_size_limit.set(deposit_size_limit)
 
     @external(readonly=True)
-    def get_deposit_size_limit(self) -> int:
+    def get_deposit_size_limit(self) -> str:
         """
         In percentage unit, e.g. `150` %
         """
-        return self._deposit_size_limit.get()
+        return str(self._deposit_size_limit.get())
 
     @external
     def set_profit_holder(self, address: Address) -> None:
@@ -189,12 +191,12 @@ class Megaloop(IconScoreBase):
     # Deposit and jackpot
 
     @external(readonly=True)
-    def get_jackpot_size(self) -> int:
-        return self._jackpot.get()
+    def get_jackpot_size(self) -> str:
+        return str(self._jackpot.get())
 
     @external(readonly=True)
-    def get_top_deposit(self) -> int:
-        return self._top_deposit.get()
+    def get_top_deposit(self) -> str:
+        return str(self._top_deposit.get())
 
     @payable
     def fallback(self):
@@ -226,11 +228,11 @@ class Megaloop(IconScoreBase):
                 if self.msg.sender not in self._players:
                     self._players.put(self.msg.sender)
                     bet_size = self.msg.value
-                    self._players_record[self.msg.sender] = bet_size
+                    self._players_deposit[self.msg.sender] = bet_size
                 else:
-                    current_amount = self._players_record[self.msg.sender]
+                    current_amount = self._players_deposit[self.msg.sender]
                     bet_size = current_amount + self.msg.value
-                    self._players_record[self.msg.sender] = bet_size
+                    self._players_deposit[self.msg.sender] = bet_size
 
                 # New high record
                 if bet_size > self._top_deposit.get():
@@ -241,6 +243,9 @@ class Megaloop(IconScoreBase):
 
                 # Update last player
                 self._last_player.set(self.msg.sender)
+
+                # Update player record
+                self._players_record[self.msg.sender] = str(self.block_height)
 
                 message = f'Received {self.msg.value/10**18} ICX from {self.msg.sender}'
                 Logger.debug(message, TAG)
@@ -312,14 +317,16 @@ class Megaloop(IconScoreBase):
             )
 
         try:
-            weights = [self._players_record[i] / jackpot for i in self._players]
+            weights = [self._players_deposit[i] / jackpot for i in self._players]
             winner_id = self._weighted_random(weights)
             if winner_id is not None:
                 winner_address = self._players.get(winner_id)
                 self.icx.transfer(winner_address, prize_value)
                 winner_record = f'Winner: {winner_address} | Prize: {prize_value/10**18} ICX | Subsidy: {subsidized/10**18} ICX'
                 self.WinnerRecord(winner_record)
-                self._last_winner.set(winner_address)
+                self._last_winner.set(
+                    f'{winner_address}:{self._players_deposit[winner_address]}:{prize_value}:{subsidized}'
+                )
 
             profit_holder_address = self._profit_holder.get()
             if profit_holder_address is not None and commission_value > 0:
@@ -333,12 +340,16 @@ class Megaloop(IconScoreBase):
             revert(f'Failed to draw winner due to error: {str(e)}')
 
     @external(readonly=True)
-    def get_last_winner(self) -> Address:
+    def get_last_winner(self) -> str:
+        """
+        Returns:
+            str: "<address>:<deposit_size>:<total_prize_value>:<subsidy_value>"
+        """
         return self._last_winner.get()
 
     @external(readonly=True)
-    def get_last_settlement_bh(self) -> int:
-        return self._last_settlement_bh.get()
+    def get_last_settlement_bh(self) -> str:
+        return str(self._last_settlement_bh.get())
 
     @external(readonly=True)
     def get_last_settlement_tx(self) -> str:
@@ -356,17 +367,40 @@ class Megaloop(IconScoreBase):
         return message
 
     @external(readonly=True)
-    def ls_players(self) -> dict:
-        players_record = {str(i): self._players_record[i] for i in self._players}
+    def ls_players(self) -> list:
+        """
+        Returns:
+            list: format
+                [
+                    "<address>:<deposit_amount>:<block_height>",
+                    ...
+                ]
+        """
+        players_record = [
+            f'{str(i)}:{self._players_deposit[i]}:{self._players_record[i]}' for i in self._players
+        ]
         return players_record
 
     @external(readonly=True)
-    def get_player(self, address: Address) -> int:
-        return self._players_record[address] if address in self._players_record else 0
+    def get_player(self, address: Address) -> str:
+        """
+        Returns:
+            str: "<address>:<deposit_amount>:<block_height>"
+        """
+        if address in self._players:
+            return (
+                f'{str(address)}:{self._players_deposit[address]}:{self._players_record[address]}'
+            )
 
     @external(readonly=True)
-    def get_last_player(self) -> Address:
-        return self._last_player.get()
+    def get_last_player(self) -> str:
+        """
+        Returns:
+            str: "<address>:<deposit_amount>:<block_height>"
+        """
+        addr = self._last_player.get()
+        if addr:
+            return f'{str(addr)}:{self._players_deposit[addr]}:{self._players_record[addr]}'
 
     # End of misc
     ###############################################################################################
