@@ -168,6 +168,19 @@ Address of the winner in previous round
     "id": 1234
 }
 
+[[get_last_player]]
+### get_last_player
+
+Address of the latest player in current round
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "hx4a8dfe91af82b5b162f0d6eb62427ad6576ccdee",
+    "id": 1234
+}
+
 [[get_last_settlement_bh]]
 ### get_last_settlement_bh
 

@@ -22,6 +22,7 @@ class Megaloop(IconScoreBase):
     _PLAYERS_RECORD = 'players_record'
     _JACKPOT = 'jackpot'
     _TOP_DEPOSIT = 'top_deposit'
+    _LAST_PLAYER = 'last_player'
 
     # History
     _LAST_SETTLEMENT_BH = 'last_settlement_bh'
@@ -51,6 +52,7 @@ class Megaloop(IconScoreBase):
         self._players_record = DictDB(self._PLAYERS_RECORD, db, value_type=int)
         self._jackpot = VarDB(self._JACKPOT, db, value_type=int)
         self._top_deposit = VarDB(self._TOP_DEPOSIT, db, value_type=int)
+        self._last_player = VarDB(self._LAST_PLAYER, db, value_type=Address)
 
         self._last_settlement_bh = VarDB(self._LAST_SETTLEMENT_BH, db, value_type=int)
         self._last_settlement_tx = VarDB(self._LAST_SETTLEMENT_TX, db, value_type=str)
@@ -237,6 +239,9 @@ class Megaloop(IconScoreBase):
                 # Update jackpot
                 self._jackpot.set(self._jackpot.get() + self.msg.value)
 
+                # Update last player
+                self._last_player.set(self.msg.sender)
+
                 message = f'Received {self.msg.value/10**18} ICX from {self.msg.sender}'
                 Logger.debug(message, TAG)
             except Exception as e:
@@ -251,6 +256,7 @@ class Megaloop(IconScoreBase):
     def _new_round(self) -> None:
         self._jackpot.set(0)
         self._top_deposit.set(0)
+        self._last_player.remove()
         self._last_settlement_bh.set(self.block_height)
         self._last_settlement_tx.set(f'0x{bytes.hex(self.tx.hash)}')
 
@@ -357,6 +363,10 @@ class Megaloop(IconScoreBase):
     @external(readonly=True)
     def get_player(self, address: Address) -> int:
         return self._players_record[address] if address in self._players_record else 0
+
+    @external(readonly=True)
+    def get_last_player(self) -> Address:
+        return self._last_player.get()
 
     # End of misc
     ###############################################################################################
