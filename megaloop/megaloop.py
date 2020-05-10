@@ -40,7 +40,7 @@ class Megaloop(IconScoreBase):
     _ENABLED = 'enabled'
 
     @eventlog
-    def WinnerRecord(self, winner_record: str):
+    def WinnerRecord(self, winner_address: str, deposit: str, prize: str, subsidy: str, data: str):
         pass
 
     @eventlog
@@ -322,11 +322,15 @@ class Megaloop(IconScoreBase):
             if winner_id is not None:
                 winner_address = self._players.get(winner_id)
                 self.icx.transfer(winner_address, prize_value)
-                winner_record = f'Winner: {winner_address} | Prize: {prize_value/10**18} ICX | Subsidy: {subsidized/10**18} ICX'
-                self.WinnerRecord(winner_record)
-                self._last_winner.set(
-                    f'{winner_address}:{self._players_deposit[winner_address]}:{prize_value}:{subsidized}'
+                data = f'{winner_address}:{self._players_deposit[winner_address]}:{prize_value}:{subsidized}'
+                self.WinnerRecord(
+                    f'Address: {winner_address}',
+                    f'Deposit: {self._players_deposit[winner_address] / 10 ** 18} ICX',
+                    f'Prize: {prize_value / 10 ** 18} ICX',
+                    f'Subsidy: {subsidized / 10 ** 18} ICX',
+                    data,
                 )
+                self._last_winner.set(data)
 
             profit_holder_address = self._profit_holder.get()
             if profit_holder_address is not None and commission_value > 0:
