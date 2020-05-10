@@ -10,7 +10,7 @@ DEFAULT_DEPOSIT_SIZE_LIMIT = 150  # 150%
 
 class Megaloop(IconScoreBase):
     """
-    Lightpaper: https://github.com/duyyudus/icon-lottery
+    Lightpaper: https://github.com/duyyudus/megaloop-lottery
     """
 
     _SCORE_NAME = 'ICONVIET MEGALOOP'
@@ -29,6 +29,7 @@ class Megaloop(IconScoreBase):
     _LAST_SETTLEMENT_BH = 'last_settlement_bh'
     _LAST_SETTLEMENT_TX = 'last_settlement_tx'
     _LAST_WINNER = 'last_winner'
+    _WINNER_RECORD = 'winner_record'
 
     # Governance variables
     _NON_PLAYERS = 'non_players'
@@ -59,6 +60,7 @@ class Megaloop(IconScoreBase):
         self._last_settlement_bh = VarDB(self._LAST_SETTLEMENT_BH, db, value_type=int)
         self._last_settlement_tx = VarDB(self._LAST_SETTLEMENT_TX, db, value_type=str)
         self._last_winner = VarDB(self._LAST_WINNER, db, value_type=str)
+        self._winner_record = ArrayDB(self._WINNER_RECORD, db, value_type=str)
 
         self._non_players = ArrayDB(self._NON_PLAYERS, db, value_type=Address)
         self._max_subsidy = VarDB(self._MAX_SUBSIDY, db, value_type=int)
@@ -322,15 +324,16 @@ class Megaloop(IconScoreBase):
             if winner_id is not None:
                 winner_address = self._players.get(winner_id)
                 self.icx.transfer(winner_address, prize_value)
-                data = f'{winner_address}:{self._players_deposit[winner_address]}:{prize_value}:{subsidized}'
+                winner_record = f'{self.block_height}:{winner_address}:{self._players_deposit[winner_address]}:{prize_value}:{subsidized}'
                 self.WinnerRecord(
                     f'Address: {winner_address}',
                     f'Deposit: {self._players_deposit[winner_address] / 10 ** 18} ICX',
                     f'Prize: {prize_value / 10 ** 18} ICX',
                     f'Subsidy: {subsidized / 10 ** 18} ICX',
-                    data,
+                    winner_record,
                 )
-                self._last_winner.set(data)
+                self._last_winner.set(winner_record)
+                self._winner_record.put(winner_record)
 
             profit_holder_address = self._profit_holder.get()
             if profit_holder_address is not None and commission_value > 0:
@@ -347,7 +350,7 @@ class Megaloop(IconScoreBase):
     def get_last_winner(self) -> str:
         """
         Returns:
-            str: "<address>:<deposit_size>:<total_prize_value>:<subsidy_value>"
+            str: "<block_height>:<address>:<deposit_size>:<total_prize_value>:<subsidy_value>"
         """
         return self._last_winner.get()
 
@@ -358,6 +361,10 @@ class Megaloop(IconScoreBase):
     @external(readonly=True)
     def get_last_settlement_tx(self) -> str:
         return self._last_settlement_tx.get()
+
+    @external(readonly=True)
+    def ls_winners(self) -> list:
+        return [str(addr) for addr in self._winner_record]
 
     # End of select winner
     ###############################################################################################

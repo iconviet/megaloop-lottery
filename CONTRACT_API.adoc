@@ -158,7 +158,7 @@ Record of the winner in previous round
 [source]
 {
     "jsonrpc": "2.0",
-    "result": "<address>:<deposit_size>:<total_prize_value>:<subsidy_value>",
+    "result": "<block_height>:<address>:<deposit_size>:<total_prize_value>:<subsidy_value>",
     "id": 1234
 }
 
@@ -198,5 +198,23 @@ Hash of previous winner drawing transaction
 {
     "jsonrpc": "2.0",
     "result": "0xa7936fbafc1653878ec04eb2dbf124915d7514aaf2bc447b81c37a319698bc98",
+    "id": 1234
+}
+
+[[ls_winners]]
+### ls_winners
+
+List of all winners in previous rounds
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": [
+        "649870:hx94bd58b8073779e742d9e4c167ef8dc73a4406aa:190000000000000000:400461800000000000000:400000000000000000000",
+        "649890:hx94bd58b8073779e742d9e4c167ef8dc73a4406aa:601000000000000000:400665400000000000000:400000000000000000000",
+        ...
+        "<block_height>:<address>:<deposit_size>:<total_prize_value>:<subsidy_value>"
+    ],
     "id": 1234
 }
