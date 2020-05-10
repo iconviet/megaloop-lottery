@@ -47,6 +47,8 @@ POST Request
 
 <<get_last_settlement_tx>>
 
+<<ls_winners>>
+
 [[get_jackpot_size]]
 ### get_jackpot_size
 
