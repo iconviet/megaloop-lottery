@@ -48,6 +48,10 @@ class Megaloop(IconScoreBase):
     def ProfitRecord(self, amount: int):
         pass
 
+    @eventlog
+    def EmptyRound(self, message: str):
+        pass
+
     def __init__(self, db: IconScoreDatabase) -> None:
         super().__init__(db)
         self._players = ArrayDB(self._PLAYERS, db, value_type=Address)
@@ -292,59 +296,62 @@ class Megaloop(IconScoreBase):
     def draw_winner(self) -> None:
         if self.msg.sender != self.owner:
             revert('Only contract owner is allowed to select winner')
-        elif len(self._players) < 2:
+        elif len(self._players) == 0:
+            self._new_round()
+            self.EmptyRound('There is no player, skipped and started a new round')
+        elif len(self._players) == 1:
             revert('There must be at least 2 players in current round')
         elif not self._jackpot.get() > 0:
             revert('Money pot must be greater than zero')
+        else:
+            jackpot = self._jackpot.get()
+            commission = self._commission.get()
+            max_subsidy = self._max_subsidy.get()
+            pot_limit = self._pot_limit.get()
 
-        jackpot = self._jackpot.get()
-        commission = self._commission.get()
-        max_subsidy = self._max_subsidy.get()
-        pot_limit = self._pot_limit.get()
+            # Calculate commision
+            commission_value = commission * jackpot // 100
 
-        # Calculate commision
-        commission_value = commission * jackpot // 100
+            # Calculate prize
+            jackpot_value = (100 - commission) * jackpot // 100
+            subsidized = pot_limit - jackpot_value if jackpot_value < pot_limit else 0
+            subsidized = subsidized if subsidized < max_subsidy else max_subsidy
+            prize_value = jackpot_value + subsidized
 
-        # Calculate prize
-        jackpot_value = (100 - commission) * jackpot // 100
-        subsidized = pot_limit - jackpot_value if jackpot_value < pot_limit else 0
-        subsidized = subsidized if subsidized < max_subsidy else max_subsidy
-        prize_value = jackpot_value + subsidized
-
-        required = prize_value + commission_value + self.BUFFER_FUND
-        contract_balance = self.icx.get_balance(self.address)
-        if contract_balance < required:
-            revert(
-                f'Not enough fund in the contract. Balance is {contract_balance/10**18} ICX, require {required/10**18} ICX'
-            )
-
-        try:
-            weights = [self._players_deposit[i] / jackpot for i in self._players]
-            winner_id = self._weighted_random(weights)
-            if winner_id is not None:
-                winner_address = self._players.get(winner_id)
-                self.icx.transfer(winner_address, prize_value)
-                winner_record = f'{self.block_height}:{winner_address}:{self._players_deposit[winner_address]}:{prize_value}:{subsidized}'
-                self.WinnerRecord(
-                    f'Address: {winner_address}',
-                    f'Deposit: {self._players_deposit[winner_address] / 10 ** 18} ICX',
-                    f'Prize: {prize_value / 10 ** 18} ICX',
-                    f'Subsidy: {subsidized / 10 ** 18} ICX',
-                    winner_record,
+            required = prize_value + commission_value + self.BUFFER_FUND
+            contract_balance = self.icx.get_balance(self.address)
+            if contract_balance < required:
+                revert(
+                    f'Not enough fund in the contract. Balance is {contract_balance/10**18} ICX, require {required/10**18} ICX'
                 )
-                self._last_winner.set(winner_record)
-                self._winner_record.put(winner_record)
 
-            profit_holder_address = self._profit_holder.get()
-            if profit_holder_address is not None and commission_value > 0:
-                self.icx.transfer(profit_holder_address, commission_value)
-                self.ProfitRecord(commission_value)
+            try:
+                weights = [self._players_deposit[i] / jackpot for i in self._players]
+                winner_id = self._weighted_random(weights)
+                if winner_id is not None:
+                    winner_address = self._players.get(winner_id)
+                    self.icx.transfer(winner_address, prize_value)
+                    winner_record = f'{self.block_height}:{winner_address}:{self._players_deposit[winner_address]}:{prize_value}:{subsidized}'
+                    self.WinnerRecord(
+                        f'Address: {winner_address}',
+                        f'Deposit: {self._players_deposit[winner_address] / 10 ** 18} ICX',
+                        f'Prize: {prize_value / 10 ** 18} ICX',
+                        f'Subsidy: {subsidized / 10 ** 18} ICX',
+                        winner_record,
+                    )
+                    self._last_winner.set(winner_record)
+                    self._winner_record.put(winner_record)
 
-            # New game
-            self._new_round()
+                profit_holder_address = self._profit_holder.get()
+                if profit_holder_address is not None and commission_value > 0:
+                    self.icx.transfer(profit_holder_address, commission_value)
+                    self.ProfitRecord(commission_value)
 
-        except Exception as e:
-            revert(f'Failed to draw winner due to error: {str(e)}')
+                # New game
+                self._new_round()
+
+            except Exception as e:
+                revert(f'Failed to draw winner due to error: {str(e)}')
 
     @external(readonly=True)
     def get_last_winner(self) -> str:
