@@ -31,6 +31,8 @@ POST Request
 
 <<get_max_subsidy>>
 
+<<get_current_subsidy>>
+
 <<get_pot_limit>>
 
 <<get_commission>>
@@ -65,7 +67,20 @@ Get current jackpot size of ongoing round
 [[get_max_subsidy]]
 ### get_max_subsidy
 
-Get current subsidy amount set by ICONVIET
+Get maximum subsidy amount funded by ICONVIET
+
+*Return*
+[source]
+{
+    "jsonrpc": "2.0",
+    "result": "<int_digits_in_loops>",
+    "id": 1234
+}
+
+[[get_current_subsidy]]
+### get_current_subsidy
+
+Get current subsidy amount based on jackpot size and its limit
 
 *Return*
 [source]

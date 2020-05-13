@@ -373,6 +373,18 @@ class Megaloop(IconScoreBase):
     def ls_winners(self) -> list:
         return [str(addr) for addr in self._winner_record]
 
+    @external(readonly=True)
+    def get_current_subsidy(self) -> str:
+        jackpot = self._jackpot.get()
+        commission = self._commission.get()
+        max_subsidy = self._max_subsidy.get()
+        pot_limit = self._pot_limit.get()
+        jackpot_value = (100 - commission) * jackpot // 100
+        subsidized = pot_limit - jackpot_value if jackpot_value < pot_limit else 0
+        subsidized = subsidized if subsidized < max_subsidy else max_subsidy
+
+        return str(subsidized)
+
     # End of select winner
     ###############################################################################################
 
