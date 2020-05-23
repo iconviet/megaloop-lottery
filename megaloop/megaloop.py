@@ -24,6 +24,7 @@ class Megaloop(IconScoreBase):
     _JACKPOT = 'jackpot'
     _TOP_DEPOSIT = 'top_deposit'
     _LAST_PLAYER = 'last_player'
+    _NEXT_DRAW_BH = 'next_draw_bh'
 
     # History
     _LAST_SETTLEMENT_BH = 'last_settlement_bh'
@@ -60,6 +61,7 @@ class Megaloop(IconScoreBase):
         self._jackpot = VarDB(self._JACKPOT, db, value_type=int)
         self._top_deposit = VarDB(self._TOP_DEPOSIT, db, value_type=int)
         self._last_player = VarDB(self._LAST_PLAYER, db, value_type=Address)
+        self._next_draw_bh = VarDB(self._NEXT_DRAW_BH, db, value_type=int)
 
         self._last_settlement_bh = VarDB(self._LAST_SETTLEMENT_BH, db, value_type=int)
         self._last_settlement_tx = VarDB(self._LAST_SETTLEMENT_TX, db, value_type=str)
@@ -384,6 +386,15 @@ class Megaloop(IconScoreBase):
         subsidized = subsidized if subsidized < max_subsidy else max_subsidy
 
         return str(subsidized)
+
+    @external
+    def set_next_draw_bh(self, next_draw_bh: int) -> None:
+        if self.msg.sender == self.owner:
+            self._next_draw_bh.set(next_draw_bh)
+
+    @external(readonly=True)
+    def get_next_draw_bh(self) -> str:
+        return str(self._next_draw_bh.get())
 
     # End of select winner
     ###############################################################################################
