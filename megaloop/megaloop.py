@@ -280,7 +280,7 @@ class Megaloop(IconScoreBase):
         """
         Generate a random number in range [0, 1) from `TX_HASH` + `len(PLAYERS)` + `JACKPOT`
         """
-        seed = str(bytes.hex(self.tx.hash)) + str(len(self._players)) + str(self._jackpot.get())
+        seed = str(bytes.hex(self.tx.hash)) + str(len(self._players)) + str(self._jackpot.get()) + str(self.now())
         rand = int.from_bytes(sha3_256(seed.encode()), 'big') % 100000
         return rand / 100000.0
 
