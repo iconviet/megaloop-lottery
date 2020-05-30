@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 _tmp.py
+tbears_scripts/mainnet_wallet

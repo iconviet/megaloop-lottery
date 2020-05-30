@@ -1,0 +1,15 @@
+{
+    "uri": "https://ctz.solidwallet.io/api/v3",
+    "nid": "0x1",
+    "keyStore": "./mainnet_wallet",
+    "password": "",
+    "from": "hx51a923c0fc78ecfa17eb174d018307f2302f1a84",
+    "to": "cx0000000000000000000000000000000000000000",
+    "deploy": {
+        "mode": "install",
+        "scoreParams": {}
+    },
+    "stepLimit": "0x77359400",
+    "txresult": {},
+    "transfer": {}
+}
