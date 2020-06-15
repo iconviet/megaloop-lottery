@@ -1,0 +1,10 @@
+{
+    "nid": "0x1",
+    "txresult": {},
+    "transfer": {},
+    "stepLimit": "0x77359400",
+    "uri": "https://ctz.solidwallet.io/api/v3",    
+    "to": "cx0000000000000000000000000000000000000000",
+    "from": "hx0000000000000000000000000000000000000000",
+    "keyStore": "/var/lib/teamcity/data/megaloop_mainnet.icx"
+}
