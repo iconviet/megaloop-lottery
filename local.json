@@ -3,7 +3,7 @@
     "txresult": {},
     "transfer": {},
     "stepLimit": "0x77359400",
-    "keyStore": "./local.icx",
+    "keyStore": "./local.icon",
     "password": "test1_Account",
     "uri": "http://127.0.0.1/api/v3",
     "to": "cx0000000000000000000000000000000000000000",
