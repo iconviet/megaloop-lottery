@@ -7,5 +7,5 @@
     "uri": "https://bicon.net.solidwallet.io/api/v3",
     "to": "cx0000000000000000000000000000000000000000",
     "from": "hx0000000000000000000000000000000000000000",
-    "keyStore": "/var/lib/teamcity/tbears/megaloop_testnet.icx"
+    "keyStore": "/var/lib/teamcity/tbears/megaloop/testnet.icx"
 }

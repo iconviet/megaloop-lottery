@@ -3,9 +3,9 @@
     "txresult": {},
     "transfer": {},
     "stepLimit": "0x77359400",
+    "keyStore": "./local.icx",
     "password": "test1_Account",
     "uri": "http://127.0.0.1/api/v3",
-    "keyStore": "./megaloop_local.icx",
     "to": "cx0000000000000000000000000000000000000000",
     "from": "hxe7af5fcfd8dfc67530a01a0e403882687528dfcb"
 }
