@@ -4,8 +4,8 @@
     "transfer": {},
     "password": "P@ssw0rd",
     "stepLimit": "0x77359400",
+    "keyStore": "~/tbears/megaloop_testnet.icx",
     "uri": "https://bicon.net.solidwallet.io/api/v3",
     "to": "cx0000000000000000000000000000000000000000",
-    "from": "hx0000000000000000000000000000000000000000",
-    "keyStore": "/var/lib/teamcity/data/megaloop_testnet.icx"
+    "from": "hx0000000000000000000000000000000000000000"
 }
