@@ -3,8 +3,8 @@
     "txresult": {},
     "transfer": {},
     "stepLimit": "0x77359400",
-    "uri": "https://ctz.solidwallet.io/api/v3",
-    "keyStore": "~/tbears/megaloop_mainnet.icx",
+    "uri": "https://ctz.solidwallet.io/api/v3",    
     "to": "cx0000000000000000000000000000000000000000",
-    "from": "hx0000000000000000000000000000000000000000"
+    "from": "hx0000000000000000000000000000000000000000",
+    "keyStore": "/var/lib/teamcity/tbears/megaloop_mainnet.icx",
 }
