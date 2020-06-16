@@ -1,7 +1,6 @@
 {
     "nid": "0x1",
     "stepLimit": "0x77359400",
-    "uri": "https://ctz.solidwallet.io/api/v3",    
-    "to": "cx0000000000000000000000000000000000000000",
+    "uri": "https://ctz.solidwallet.io/api/v3",
     "keyStore": "/var/lib/teamcity/tbears/megaloop/mainnet.icon"
 }
