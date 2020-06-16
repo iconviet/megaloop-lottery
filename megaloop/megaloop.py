@@ -51,7 +51,7 @@ class Megaloop(IconScoreBase):
 
     @payable
     def fallback(self):
-        self.set_fee_sharing_proportion(100)
+        self.set_fee_sharing_proportion(100)        
         if self.msg.sender in self._sponsors:
             return
         if self.msg.value == 0:
@@ -59,11 +59,11 @@ class Megaloop(IconScoreBase):
         if not self._enabled.get():
             revert('Megaloop is currently disabled')
         if self._last_draw_bh.get() == self.block_height:
-            revert('Deposit while draw is in process is not allowed')
+            revert('Deposit while drawing in process is not allowed')
         try:
             if self.msg.sender not in self._players:
                 deposit = self.msg.value
-                self._players.put(self.msg.sender)                    
+                self._players.put(self.msg.sender)
                 self._player_deposits[self.msg.sender] = deposit
             else:
                 current = self._player_deposits[self.msg.sender]
@@ -72,8 +72,7 @@ class Megaloop(IconScoreBase):
 
             self._last_player.set(self.msg.sender)
             self._prize.set(self._prize.get() + self.msg.value)
-            self._player_records[self.msg.sender] = str(self.block_height)
-            
+            self._player_records[self.msg.sender] = str(self.block_height) 
         except Exception as e:
             revert(f'Megaloop failed to process your deposit. Error: {str(e)}')
     
