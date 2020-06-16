@@ -1,15 +1,18 @@
 from iconservice import *
 
 class Megaloop(IconScoreBase):
-    
+        
     @external(readonly=True)
     def name(self) -> str:
-        return 'MEGALOOP v1.0.0'
+        return 'MEGALOOP v1.0.0'    
 
-    def on_update(self) -> None:
+    def on_update(self):
         super().on_update()
-
-    def on_install(self) -> None:
+        
+        if self.owner not in self._sponsors:
+            self._sponsors.put(self.owner)
+    
+    def on_install(self):
         super().on_install()
 
         self._prize.set(0)
@@ -20,7 +23,7 @@ class Megaloop(IconScoreBase):
         self._max_subsidy.set(50 * 10 ** 18)
         self._prize_limit.set(1000 * 10 ** 18)    
 
-    def __init__(self, db: IconScoreDatabase) -> None:
+    def __init__(self, db: IconScoreDatabase):
         super().__init__(db)
         
         # VarDB
@@ -44,20 +47,49 @@ class Megaloop(IconScoreBase):
         self._player_records = DictDB('player_records', db, value_type=str)
         self._player_deposits = DictDB('player_deposits', db, value_type=int)
 
-    #########################################################################
+    ###########################################################################
+
+    @payable
+    def fallback(self):
+        self.set_fee_sharing_proportion(100)
+        if self.msg.sender in self._sponsors:
+            return
+        if self.msg.value == 0:
+            revert('Zero deposit is not allowed')
+        if not self._enabled.get():
+            revert('Megaloop is currently disabled')
+        if self._last_draw_bh.get() == self.block_height:
+            revert('Deposit while draw is in process is not allowed')
+        try:
+            if self.msg.sender not in self._players:
+                deposit = self.msg.value
+                self._players.put(self.msg.sender)                    
+                self._player_deposits[self.msg.sender] = deposit
+            else:
+                current = self._player_deposits[self.msg.sender]
+                deposit = current + self.msg.value
+                self._player_deposits[self.msg.sender] = deposit
+
+            self._last_player.set(self.msg.sender)
+            self._prize.set(self._prize.get() + self.msg.value)
+            self._player_records[self.msg.sender] = str(self.block_height)
+            
+        except Exception as e:
+            revert(f'Megaloop failed to process your deposit. Error: {str(e)}')
     
+    ###########################################################################
+
     @external
-    def add_sponsor(self, address: Address) -> None:
+    def add_sponsor(self, address: Address):
         if address not in self._sponsors:
             self._sponsors.put(address)
 
     @external(readonly=True)
     def get_sponsors(self) -> list:
-        addresses = [str(i) for i in self._sponsors]
-        return addresses
+        return [str(i) for i in self._sponsors]
 
     @external
-    def set_max_subsidy(self, max_subsidy: int) -> None:
+    def set_max_subsidy(self, max_subsidy: int):
         if self.msg.sender == self.owner:
             self._max_subsidy.set(max_subsidy)
 
@@ -66,7 +98,7 @@ class Megaloop(IconScoreBase):
         return str(self._max_subsidy.get())
 
     @external
-    def set_prize_limit(self, prize_limit: int) -> None:
+    def set_prize_limit(self, prize_limit: int):
         if self.msg.sender == self.owner:
             self._prize_limit.set(prize_limit)
 
@@ -75,7 +107,7 @@ class Megaloop(IconScoreBase):
         return str(self._prize_limit.get())
 
     @external
-    def set_comm_rate(self, comm_rate: int) -> None:        
+    def set_comm_rate(self, comm_rate: int):        
         if self.msg.sender == self.owner:
             self._comm_rate.set(comm_rate)
 
@@ -84,7 +116,7 @@ class Megaloop(IconScoreBase):
         return str(self._comm_rate.get())
     
     @external
-    def set_comm_address(self, address: Address) -> None:
+    def set_comm_address(self, address: Address):
         if self.msg.sender == self.owner:
             self._comm_address.set(address)
 
@@ -93,7 +125,7 @@ class Megaloop(IconScoreBase):
         return self._comm_address.get()
 
     @external
-    def set_enabled(self, enabled: bool) -> None:
+    def set_enabled(self, enabled: bool):
         if self.msg.sender == self.owner:
             self._enabled.set(enabled)
 
@@ -104,127 +136,6 @@ class Megaloop(IconScoreBase):
     @external(readonly=True)
     def get_prize(self) -> str:
         return str(self._prize.get())
-
-    @payable
-    def fallback(self):
-        """
-        Accept ICX sent by anyone.
-        """
-        if self.msg.sender in self._sponsors:
-            # Always receive ICX from sponsors
-            pass
-        elif not self._enabled.get():
-            revert('Megaloop is currently disabled')
-        elif self.msg.value + self._prize.get() > self._prize_limit.get():
-            revert(f'Deposit exceeded prize limit')
-        elif self._last_draw_bh.get() == self.block_height:
-            revert('Failed due to current block contains winner drawing transaction')
-        elif self.msg.value == 0:
-            revert('Zero deposit is not allowed')
-        else:
-            try:
-                if self.msg.sender not in self._players:
-                    self._players.put(self.msg.sender)
-                    bet_size = self.msg.value
-                    self._player_deposits[self.msg.sender] = bet_size
-                else:
-                    current_amount = self._player_deposits[self.msg.sender]
-                    bet_size = current_amount + self.msg.value
-                    self._player_deposits[self.msg.sender] = bet_size
-
-                # Update prize
-                self._prize.set(self._prize.get() + self.msg.value)
-
-                # Update last player
-                self._last_player.set(self.msg.sender)
-
-                # Update player record
-                self._player_records[self.msg.sender] = str(self.block_height)
-            
-            except Exception as e:
-                revert(f'Failed to receive ICX due to error: {str(e)}')
-
-    ###############################################################################################
-    # Draw winner
-
-    def _new_round(self) -> None:
-        self._prize.set(0)
-        self._last_player.remove()
-        self._last_draw_bh.set(self.block_height)
-        self._last_draw_tx.set(f'0x{bytes.hex(self.tx.hash)}')
-
-        while len(self._players) > 0:
-            self._players.pop()
-
-    def _random(self) -> float:
-        """
-        Generate a random number in range [0, 1) from `TX_HASH` + `len(PLAYERS)` + `JACKPOT`
-        """
-        seed = str(bytes.hex(self.tx.hash)) + str(len(self._players)) + str(self._prize.get()) + str(self.now())
-        rand = int.from_bytes(sha3_256(seed.encode()), 'big') % 100000
-        return rand / 100000.0
-
-    def _weighted_random(self, weights: list) -> int:
-        """
-        Linear scan weighted random choice ( weight is probability )
-        """
-        remaining_distance = self._random() * sum(weights)
-        for i, w in enumerate(weights):
-            remaining_distance -= w
-            if remaining_distance < 0:
-                return i
-
-    @external
-    def draw_winner(self) -> None:
-        if self.msg.sender != self.owner:
-            revert('Only contract owner is allowed to select winner')
-        elif len(self._players) == 0:
-            self._new_round()
-        elif len(self._players) == 1:
-            revert('There must be at least 2 players in current round')
-        elif not self._prize.get() > 0:
-            revert('Prize must be greater than zero')
-        else:
-            prize = self._prize.get()
-            comm_rate = self._comm_rate.get()
-            max_subsidy = self._max_subsidy.get()
-            prize_limit = self._prize_limit.get()
-
-            # Calculate commision
-            comm_rate_value = comm_rate * prize // 100
-
-            # Calculate prize
-            prize_value = (100 - comm_rate) * prize // 100
-            subsidized = prize_limit - prize_value if prize_value < prize_limit else 0
-            subsidized = subsidized if subsidized < max_subsidy else max_subsidy
-            prize_value = prize_value + subsidized
-
-            required = prize_value + comm_rate_value
-            contract_balance = self.icx.get_balance(self.address)
-            if contract_balance < required:
-                revert(
-                    f'Not enough fund in the contract. Balance is {contract_balance/10**18} ICX, require {required/10**18} ICX'
-                )
-
-            try:
-                weights = [self._player_deposits[i] / prize for i in self._players]
-                winner_id = self._weighted_random(weights)
-                if winner_id is not None:
-                    winner_address = self._players.get(winner_id)
-                    self.icx.transfer(winner_address, prize_value)
-                    winner_records = f'{self.block_height}:{winner_address}:{self._player_deposits[winner_address]}:{prize_value}:{subsidized}'                    
-                    self._last_winner.set(winner_records)
-                    self._winner_records.put(winner_records)
-
-                comm_address_address = self._comm_address.get()
-                if comm_address_address is not None and comm_rate_value > 0:
-                    self.icx.transfer(comm_address_address, comm_rate_value)
-
-                # New game
-                self._new_round()
-
-            except Exception as e:
-                revert(f'Failed to draw winner due to error: {str(e)}')
 
     @external(readonly=True)
     def get_last_winner(self) -> str:
@@ -253,13 +164,10 @@ class Megaloop(IconScoreBase):
         max_subsidy = self._max_subsidy.get()
         prize_limit = self._prize_limit.get()
         prize_value = (100 - comm_rate) * prize // 100
-        subsidized = prize_limit - prize_value if prize_value < prize_limit else 0
-        subsidized = subsidized if subsidized < max_subsidy else max_subsidy
+        subsidy = prize_limit - prize_value if prize_value < prize_limit else 0
+        subsidy = subsidy if subsidy < max_subsidy else max_subsidy
 
-        return str(subsidized)
-
-    # End of select winner
-    ###############################################################################################
+        return str(subsidy)
 
     @external(readonly=True)
     def get_players(self) -> list:
@@ -296,3 +204,85 @@ class Megaloop(IconScoreBase):
         addr = self._last_player.get()
         if addr:
             return f'{str(addr)}:{self._player_deposits[addr]}:{self._player_records[addr]}'
+
+    ###########################################################################
+
+    def _new_round(self):
+        self._prize.set(0)
+        self._last_player.remove()
+        self._last_draw_bh.set(self.block_height)
+        self._last_draw_tx.set(f'0x{bytes.hex(self.tx.hash)}')
+
+        while len(self._players) > 0:
+            self._players.pop()
+
+    def _random(self) -> float:
+        """
+        Generate a random number in range [0, 1) from `TX_HASH` + `len(PLAYERS)` + `JACKPOT`
+        """
+        seed = str(bytes.hex(self.tx.hash)) + str(len(self._players)) + str(self._prize.get()) + str(self.now())
+        rand = int.from_bytes(sha3_256(seed.encode()), 'big') % 100000
+        return rand / 100000.0
+
+    def _weighted_random(self, weights: list) -> int:
+        """
+        Linear scan weighted random choice ( weight is probability )
+        """
+        remaining_distance = self._random() * sum(weights)
+        for i, w in enumerate(weights):
+            remaining_distance -= w
+            if remaining_distance < 0:
+                return i
+
+    @external
+    def draw_winner(self):
+        if self.msg.sender != self.owner:
+            revert('Only contract owner is allowed to select winner')
+        elif len(self._players) == 0:
+            self._new_round()
+        elif len(self._players) == 1:
+            revert('There must be at least 2 players in current round')
+        elif not self._prize.get() > 0:
+            revert('Prize must be greater than zero')
+        else:
+            prize = self._prize.get()
+            comm_rate = self._comm_rate.get()
+            max_subsidy = self._max_subsidy.get()
+            prize_limit = self._prize_limit.get()
+
+            # calculate commision
+            comm_rate_value = comm_rate * prize // 100
+
+            # calculate prize
+            prize_value = (100 - comm_rate) * prize // 100
+            subsidy = prize_limit - prize_value if prize_value < prize_limit else 0
+            subsidy = subsidy if subsidy < max_subsidy else max_subsidy
+            prize_value = prize_value + subsidy
+
+            required = prize_value + comm_rate_value
+            contract_balance = self.icx.get_balance(self.address)
+            if contract_balance < required:
+                revert(f'Not enough fund in the contract. Balance is {contract_balance/10**18} ICX, require {required/10**18} ICX')
+            
+            try:
+                weights = [self._player_deposits[i] / prize for i in self._players]
+                winner_id = self._weighted_random(weights)
+                
+                if winner_id is not None:
+                    winner_address = self._players.get(winner_id)
+                    self.icx.transfer(winner_address, prize_value)
+                    winner_records = f'{self.block_height}:{winner_address}:{self._player_deposits[winner_address]}:{prize_value}:{subsidy}'                    
+                    self._last_winner.set(winner_records)
+                    self._winner_records.put(winner_records)
+
+                comm_address_address = self._comm_address.get()
+                
+                if comm_address_address is not None and comm_rate_value > 0:
+                    self.icx.transfer(comm_address_address, comm_rate_value)
+
+                self._new_round()
+
+            except Exception as e:
+                revert(f'Failed to draw winner due to error: {str(e)}')
+
+    ###########################################################################
