@@ -1,9 +1,7 @@
 {
     "nid": "0x3",
-    "txresult": {},
-    "transfer": {},
     "stepLimit": "0x77359400",
     "keyStore": "./local.icon",
     "password": "test1_Account",
-    "uri": "http://127.0.0.1/api/v3"
+    "uri": "http://127.0.0.1:9000/api/v3"
 }
