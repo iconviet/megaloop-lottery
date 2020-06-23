@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2020 ICONVIET
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # pylint: disable=W0614
 from iconservice import *
 from .scorelib.set import *
@@ -161,7 +177,7 @@ class Megaloop(IconScoreBase):
             """
             3. start calculating winning ticket
             """
-            chances = [self._ticket_values[i] / draw_prize for i in self._tickets]
+            chances = [self._ticket_values[x] / draw_prize for x in self._tickets]
             index = self._calculate(chances)
             """
             4. transfer real prize to winner's address
@@ -233,11 +249,11 @@ class Megaloop(IconScoreBase):
     
     @external(readonly=True)
     def get_draw_ids(self) -> list:
-        return [str(i) for i in self._draw_ids]
+        return [str(x) for x in self._draw_ids]
     
     @external(readonly=True)
     def get_sponsors(self) -> list:
-        return [str(i) for i in self._sponsors]
+        return [str(x) for x in self._sponsors]
 
     @external(readonly=True)
     def get_last_ticket(self) -> str:
@@ -260,35 +276,47 @@ class Megaloop(IconScoreBase):
         return None
 
     @external(readonly=True)
-    def get_tickets(self) -> str:
-        return json_dumps([dict(
-            address=str(i),
-            value=self._ticket_values[i],
-            block=self._ticket_blocks[i]) for i in self._tickets
-        ])
-
-    @external(readonly=True)
     def get_players(self) -> str:
         return json_dumps([dict(
-            address=str(i),
-            total=self._player_totals[i],
-            block=self._player_blocks[i]) for i in self._players
+            address=str(x),
+            total=self._player_totals[x],
+            block=self._player_blocks[x]) for x in self._players
         ])
 
     @external(readonly=True)
     def get_winners(self) -> str:
         return json_dumps([dict(
-            address=str(i),
-            prize=self._winner_prizes[i],
-            block=self._winner_blocks[i]) for i in self._winners
+            address=str(x),
+            prize=self._winner_prizes[x],
+            block=self._winner_blocks[x]) for x in self._winners
         ])
 
     @external(readonly=True)
+    def get_tickets(self) -> str:
+        y = self._draw_prize.get()
+        return json_dumps([dict(
+            address=str(x),
+            value=self._ticket_values[x],
+            block=self._ticket_blocks[x],
+            chance=self._ticket_values[x] / y) for x in self._tickets
+        ])
+
+    @external(readonly=True)
+    def get_ticket_history(self, draw_id:int) -> str:
+        y = self._draw_prize.get()
+        return json_dumps([dict(
+            address=str(x),
+            value=self._ticket_values[x],
+            block=self._ticket_blocks[x],
+            chance=self._ticket_values[x] / y) for x in self._tickets
+        ])
+    
+    @external(readonly=True)
     def get_draw_seeding(self) -> int:
-        reserve_ratio = self._reserve_ratio.get()        
         draw_prize = self._draw_prize.get()
         prize_limit = self._prize_limit.get()
         seeding_limit = self._seeding_limit.get()
+        reserve_ratio = self._reserve_ratio.get()
         real_prize = (100 - reserve_ratio) * draw_prize // 100
         draw_seeding = prize_limit - real_prize if real_prize < prize_limit else 0
         draw_seeding = draw_seeding if draw_seeding < seeding_limit else seeding_limit
