@@ -17,15 +17,14 @@
 # pylint: disable=W0614
 from iconservice import *
 
-class JsonBase(object):
-    def __str__(self): 
-        return json_dumps(self.__dict__)
+class Config(object):
+    
+    def save(self):
+        self._db.set(json_dumps(self.__dict__))
 
-    def to_json(self) -> str:
-        return json_dumps(self.__dict__)
-
-    def __init__(self, json:str=None):
-        if not json:
-            self.version = None
+    def __init__(self, db:IconScoreDatabase):
+        self._db = VarDB('config', db, value_type=str)
+        if not self._db.get():
+            self.enabled = True
         else:
-            self.__dict__ = json_loads(json)
+            self.__dict__ = json_loads(self._db.get())

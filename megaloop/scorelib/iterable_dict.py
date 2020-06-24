@@ -63,6 +63,9 @@ class IterableDictDB(object):
         del self._values[key]
         self._keys.remove(key)
 
+    def get(self, index:int) -> type:
+        return self._values[self._keys[index]]
+
     def select(self, offset: int, cond=None, **kwargs) -> dict:
         """ Returns a limited amount of items in the IterableDictDB that optionally fulfills a condition """
         keys = iter(self._keys)

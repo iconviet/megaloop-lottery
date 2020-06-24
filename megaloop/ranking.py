@@ -15,17 +15,8 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from iconservice import *
+from .jsonbase import *
 
-class JsonBase(object):
-    def __str__(self): 
-        return json_dumps(self.__dict__)
-
-    def to_json(self) -> str:
-        return json_dumps(self.__dict__)
-
+class Ranking(JsonBase):
     def __init__(self, json:str=None):
-        if not json:
-            self.version = None
-        else:
-            self.__dict__ = json_loads(json)
+        super().__init__(json)

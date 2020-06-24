@@ -1,6 +1,6 @@
 {
     "nid": "0x3",
-    "stepLimit": "0x77359400",
+    "stepLimit": "0x2540be400",
     "keyStore": "./local.icon",
     "password": "test1_Account",
     "uri": "http://127.0.0.1:9000/api/v3"

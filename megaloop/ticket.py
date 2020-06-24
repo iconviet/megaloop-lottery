@@ -18,5 +18,10 @@
 from .jsonbase import *
 
 class Ticket(JsonBase):
-    def __init__(self, data:dict):
-        super().__init__(data)
+    def __init__(self, json:str=None):
+        if not json:
+            self.value = 0
+            self.block = 0
+            self.address = None
+        else:
+            super().__init__(json)

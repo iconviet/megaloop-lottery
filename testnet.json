@@ -1,6 +1,6 @@
 {
     "nid": "0x3",
-    "stepLimit": "0x77359400",
+    "stepLimit": "0x2540be400",
     "uri": "https://bicon.net.solidwallet.io/api/v3",
     "keyStore": "/var/lib/teamcity/tbears/megaloop/testnet.icon"
 }

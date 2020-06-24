@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 # Copyright 2020 ICONVIET
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,15 @@
 # limitations under the License.
 
 # pylint: disable=W0614
+from .config import *
+from .ticket import *
+from .player import *
+from .winner import *
+from .ranking import *
+from .tickets import *
+from .players import *
 from iconservice import *
 from .scorelib.set import *
-from .pylinq.py_linq import *
 from .scorelib.iterable_dict import *
 
 class Megaloop(IconScoreBase):
@@ -28,19 +34,21 @@ class Megaloop(IconScoreBase):
     def on_install(self):
         super().on_install()
         
-        self._enabled.set(True)
         self._reserve_ratio.set(15)
         self._sponsors.add(self.owner)
         self._draw_id.set(self.block_height)
-        self._draw_ids.add(self.block_height)
+        self._sequences.add(self.block_height)
         self._seeding_limit.set(5 * 10 ** 18)
         self._prize_limit.set(1000 * 10 ** 18)
 
     def __init__(self, db: IconScoreDatabase):
         super().__init__(db)
         
+        self.config = Config(db)
+        self._tickets = Tickets(db)
+        self._players = Players(db)
+        
         self._draw_id = VarDB('draw_id', db, value_type=int)
-        self._enabled = VarDB('enabled', db, value_type=bool)
         self._draw_prize = VarDB('draw_prize', db, value_type=int)
         self._prize_limit = VarDB('prize_limit', db, value_type=int)
         self._last_draw_id = VarDB('last_draw_id', db, value_type=int)
@@ -48,27 +56,14 @@ class Megaloop(IconScoreBase):
         self._last_draw_tx = VarDB('last_draw_tx', db, value_type=str)
         self._seeding_limit = VarDB('seeding_limit', db, value_type=int)
         self._reserve_ratio = VarDB('reserve_ratio', db, value_type=int)
+        
         self._treasury_addr = VarDB('treasury_addr', db, value_type=Address)
-
-        self._draw_ids = SetDB('draw_ids', db, value_type=int, order=True)
-        self._players = SetDB('players', db, value_type=Address, order=True)
-        self._winners = SetDB('winners', db, value_type=Address, order=True)
-        self._ranking = SetDB('ranking', db, value_type=Address, order=True)
+        
+        self._sequences = SetDB('sequences', db, value_type=int, order=True)
         self._sponsors = SetDB('sponsors', db, value_type=Address, order=True)
 
-        self._player_names = IterableDictDB('player_names', db, value_type=str)
-        self._player_totals = IterableDictDB('player_totals', db, value_type=int)
-        self._player_blocks = IterableDictDB('player_blocks', db, value_type=int)
-                
-        self._winner_prizes = IterableDictDB('winner_prizes', db, value_type=int)
-        self._winner_blocks = IterableDictDB('winner_blocks', db, value_type=int)
-
-        self._ranking_totals = IterableDictDB('ranking_totals', db, value_type=int)
-        self._ranking_prizes = IterableDictDB('ranking_prizes', db, value_type=int)
-
-        self._tickets = SetDB(f'tickets_{self._draw_id.get()}', db, value_type=Address, order=True)
-        self._ticket_values = IterableDictDB(f'ticket_values_{self._draw_id.get()}', db, value_type=int)
-        self._ticket_blocks = IterableDictDB(f'ticket_blocks_{self._draw_id.get()}', db, value_type=int)
+        self._winners = IterableDictDB('winners', db, value_type=str, order=True)
+        self._ranking = IterableDictDB('ranking', db, value_type=str, order=True)
         
     ####################################################################################################
 
@@ -80,38 +75,49 @@ class Megaloop(IconScoreBase):
             return
         if value == 0:
             revert('Zero value is not allowed')
-        if not self._enabled.get():
-            revert('Contract is currently disabled')
+        # if not self.config.enabled:
+        #     revert('Contract is currently disabled')
         if self._last_draw_bh.get() == self.block_height:
-            revert('Draw is in process. Play is not allowed')
+            revert('Draw in progress. Deposit is not allowed')
         try:
+            ticket = self._tickets.get(str(address))
+            player = self._players.get(str(address))
+            if not ticket:
+                # create ticket
+                ticket = Ticket()
+                ticket.version = 1
+                ticket.value = value
+                ticket.address = str(address)
+                ticket.block = self.block_height
+                self._tickets.add(ticket)
+            else:
+                # replace ticket
+                ticket.block = self.block_height
+                ticket.value = ticket.value + value
+                self._tickets.update(ticket)
+            if not player:
+                # create player
+                player = Player()
+                player.version = 1
+                player.value = value
+                player.address = str(address)
+                player.block = self.block_height
+                self._players.add(player)
+            else:
+                # update player
+                player.value = player.value + value
+                self._players.update(player)
             self._draw_prize.set(self._draw_prize.get() + value)
-            # create/update ticket
-            if address not in self._tickets:
-                self._tickets.add(address)
-                self._ticket_values[address] = value
-            else:
-                last = self._ticket_values[address]
-                self._ticket_values[address] = last + value
-            self._ticket_blocks[address] = str(self.block_height)
-            # create/update player
-            if address in self._players:
-                last = self._player_totals[address]
-                self._player_totals[address] = last + value
-            else:
-                self._players.add(address)
-                self._player_totals[address] = value
-                self._player_blocks[address] = str(self.block_height)
-            
         except Exception as e:
-            revert(f'Unable to process your transaction. Error: {str(e)}')
+            revert(f'Megaloop was unable to process your transaction. Error: {str(e)}')
     
     ####################################################################################################
 
     @external
     def set_enabled(self, enabled: bool):
         if self.msg.sender == self.owner:
-            self._enabled.set(enabled)
+            self.config.enabled = enabled
+            self.config.save()
 
     @external
     def add_sponsor(self, address: Address):
@@ -174,41 +180,42 @@ class Megaloop(IconScoreBase):
             icx_minimum = real_prize + reserve_value
             icx_balance = self.icx.get_balance(self.address)
             if icx_balance < icx_minimum:
-                revert(f'Insufficient fund. Current balance is {icx_balance/10**18} ICX, {icx_minimum/10**18} ICX is required')
+                revert(f'Insufficient fund. {icx_minimum/10**18} ICX is required')
             """
-            3. start calculating winning ticket
+            3. start calculating winning ticket chances
             """
-            chances = [self._ticket_values[x] / draw_prize for x in self._tickets]
+            chances = [Ticket(ticket).value / draw_prize for ticket in self._tickets]
             index = self._calculate(chances)
-            """
-            4. transfer real prize to winner's address
-            """
-            address = self._tickets[index]
-            self.icx.transfer(address, real_prize)
-            """
-            5. transfer reserve value to treasury address
-            """
-            treasury_addr = self._treasury_addr.get()
-            if treasury_addr is not None and reserve_value > 0:
-                self.icx.transfer(treasury_addr, reserve_value)
-            """
-            6. record winning address, real prize, block height
-            """
-            self._winners.add(address)
-            self._winner_prizes[address] = real_prize
-            self._winner_blocks[address] = self.block_height            
-            """
-            7. record last draw information and start next draw
-            """
-            db = super().db
-            self._draw_prize.set(0)
-            self._draw_id.set(self.block_height)
-            self._draw_ids.add(self.block_height)
-            self._last_draw_bh.set(self.block_height)
-            self._last_draw_tx.set(f'0x{bytes.hex(self.tx.hash)}')
-            self._tickets = SetDB(f'tickets_{self._draw_id.get()}', db, value_type=Address, order=True)
-            self._ticket_values = IterableDictDB(f'ticket_values_{self._draw_id.get()}', db, value_type=int)
-            self._ticket_blocks = IterableDictDB(f'ticket_blocks_{self._draw_id.get()}', db, value_type=int)
+            try:
+                """
+                4. transfer real prize to winner's address
+                """
+                address = self._tickets.get[index]
+                self.icx.transfer(address, real_prize)
+                """
+                5. transfer reserve value to treasury address
+                """
+                treasury_addr = self._treasury_addr.get()
+                if treasury_addr is not None and reserve_value > 0:
+                    self.icx.transfer(treasury_addr, reserve_value)
+                """
+                6. record winning address, real prize, block height
+                """
+                winner = Winner()
+                winner.version = 1
+                winner.prize = real_prize
+                winner.block = self.block_height
+                self._winners[address] = str(winner)
+                """
+                7. record last draw information and start next draw
+                """
+                self._draw_prize.set(0)
+                self._draw_id.set(self.block_height)
+                self._sequences.add(self.block_height)
+                self._last_draw_bh.set(self.block_height)
+                self._last_draw_tx.set(f'0x{bytes.hex(self.tx.hash)}')
+            except Exception as e:
+                revert(f'Failed to process transaction. Error: {str(e)}')
 
     ####################################################################################################
 
@@ -218,7 +225,7 @@ class Megaloop(IconScoreBase):
 
     @external(readonly=True)
     def get_enabled(self) -> bool:
-        return self._enabled.get()
+        return self.config.enabled
 
     @external(readonly=True)
     def get_draw_id(self) -> int:
@@ -245,73 +252,47 @@ class Megaloop(IconScoreBase):
         return self._reserve_ratio.get()
 
     @external(readonly=True)
+    def get_last_ticket(self) -> str:
+        return str(self._tickets.get_last())
+
+    @external(readonly=True)
+    def get_last_player(self) -> str:
+        return str(self._players.get_last())
+
+    @external(readonly=True)
     def get_treasury_address(self) -> Address:
         return self._treasury_addr.get()
     
     @external(readonly=True)
-    def get_draw_ids(self) -> list:
-        return [str(x) for x in self._draw_ids]
+    def get_sequences(self) -> list:
+        return [str(x) for x in self._sequences]
     
     @external(readonly=True)
     def get_sponsors(self) -> list:
         return [str(x) for x in self._sponsors]
-
-    @external(readonly=True)
-    def get_last_ticket(self) -> str:
-        if self._tickets:
-            address = self._tickets[len(self._tickets) - 1]
-            if address:
-                return json_dumps(dict(
-                    address=str(address),
-                    block=self._ticket_blocks[address],
-                    ticket=self._ticket_values[address]
-                ))
-        return None
-
+    
     @external(readonly=True)
     def get_last_winner(self) -> str:
-        if self._winners:
-            address = self._winners[len(self._winners) - 1]
-            if address:
-                return json_dumps(dict(address=str(address)))
-        return None
-
-    @external(readonly=True)
-    def get_players(self) -> str:
-        return json_dumps([dict(
-            address=str(x),
-            total=self._player_totals[x],
-            block=self._player_blocks[x]) for x in self._players
-        ])
-
-    @external(readonly=True)
-    def get_winners(self) -> str:
-        return json_dumps([dict(
-            address=str(x),
-            prize=self._winner_prizes[x],
-            block=self._winner_blocks[x]) for x in self._winners
-        ])
+        if not self._winners:
+            return None
+        return self._winners[len(self._winners) - 1]
 
     @external(readonly=True)
     def get_tickets(self) -> str:
-        y = self._draw_prize.get()
-        return json_dumps([dict(
-            address=str(x),
-            value=self._ticket_values[x],
-            block=self._ticket_blocks[x],
-            chance=self._ticket_values[x] / y) for x in self._tickets
-        ])
+        return [ticket for ticket in self._tickets]
 
     @external(readonly=True)
-    def get_ticket_history(self, draw_id:int) -> str:
-        y = self._draw_prize.get()
-        return json_dumps([dict(
-            address=str(x),
-            value=self._ticket_values[x],
-            block=self._ticket_blocks[x],
-            chance=self._ticket_values[x] / y) for x in self._tickets
-        ])
-    
+    def get_players(self) -> str:
+        return [player for player in self._players]
+
+    @external(readonly=True)
+    def get_winners(self) -> str:
+        return [winner for winner in self._winners]
+
+    @external(readonly=True)
+    def get_ranking(self) -> str:
+        return [player for player in self._ranking.values()]
+        
     @external(readonly=True)
     def get_draw_seeding(self) -> int:
         draw_prize = self._draw_prize.get()
