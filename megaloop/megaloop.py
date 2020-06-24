@@ -17,6 +17,7 @@
 # pylint: disable=W0614
 from iconservice import *
 from .scorelib.set import *
+from .pylinq.py_linq import *
 from .scorelib.iterable_dict import *
 
 class Megaloop(IconScoreBase):
