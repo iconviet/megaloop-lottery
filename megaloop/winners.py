@@ -15,16 +15,29 @@
 # limitations under the License.
 
 # pylint: disable=W0614
+from .winner import *
 from iconservice import *
+from .scorelib.iterable_dict import *
 
-class Config(object):
+class Winners(IterableDictDB):
     
-    def save(self):
-        self._db.set(json_dumps(self.__dict__))
+    def __iter__(self):
+        for value in self.values():
+            yield value
+
+    def add(self, winner:Winner):
+        self[winner.address] = winner.to_json()
+
+    def update(self, winner:Winner):
+        self[winner.address] = winner.to_json()
+
+    def get_last(self) -> Winner:
+        if not self: return None
+        return Winner(super().get(len(self) - 1))
+    
+    def get(self, address:str) -> Winner:
+        json = self[address]
+        return None if not json else Winner(json)
 
     def __init__(self, db:IconScoreDatabase):
-        self._db = VarDB('config', db, value_type=str)
-        if not self._db.get():
-            self.enabled = True
-        else:
-            self.__dict__ = json_loads(self._db.get())
+        super().__init__('winners', db, value_type=str, order=True)
