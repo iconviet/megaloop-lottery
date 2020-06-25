@@ -25,6 +25,6 @@ class Config(object):
     def __init__(self, db:IconScoreDatabase):
         self._config = VarDB('config', db, value_type=str)
         if not self._config.get():
-            self.payout_ratio = None
+            self.pay_ratio = None
         else:
             self.__dict__ = json_loads(self._config.get())

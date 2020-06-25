@@ -53,56 +53,56 @@ class Megaloop(IconScoreBase):
     def on_update(self):
         super().on_update()
         
+        self._config.pay_ratio = .85
         self._config.topup_limit = 5
         self._config.prize_limit = 1000
-        self._config.payout_ratio = 0.85
-        self._drawbox.open(self.block_height, 5)
+        #self._drawbox.close(self.block_height, 0)
+        #self._drawbox.open(self.block_height, 5)
 
-    ###################################################################################
+    #######################################################################################
 
     @payable
     def fallback(self):
         value = self.msg.value
         address = str(self.msg.sender)
-        if address in self._sponsors:
-            return
-        open_draw = self._drawbox.get_open()
-        if value == 0:
-            revert('Zero deposit is not allowed.')
-        if not open_draw:
-            revert('Draw is not opened.Try again later.')
-        try:
-            ticket = self._tickets[address]
-            player = self._players[address]
-            if not ticket:
-                ticket = self._tickets.create()
-                ticket.total = value
-                ticket.address = str(address)
-                ticket.block = self.block_height
-            else:
-                ticket.block = self.block_height
-                ticket.total = ticket.total + value
-            if not player:
-                player =self._players.create()
-                player.total = value
-                player.address = str(address)
-                player.block = self.block_height
-            else:
-                player.total = player.total + value
-            self._tickets.add_or_update(ticket)
-            self._players.add_or_update(player)
-            open_draw.prize = open_draw.prize + value
-            self._drawbox.update_open(open_draw)
-        except Exception as e:
-            revert(f'Megaloop was unable to process your transaction. Error: {str(e)}')
+        if address in self._sponsors: return
+        if value:
+            try:
+                open_draw = self._drawbox.get_open()
+                if open_draw:
+                    ticket = self._tickets[address]
+                    player = self._players[address]
+                    if not ticket:
+                        ticket = self._tickets.create()
+                        ticket.total = value
+                        ticket.address = str(address)
+                        ticket.block = self.block_height
+                    else:
+                        ticket.block = self.block_height
+                        ticket.total = ticket.total + value
+                    if not player:
+                        player =self._players.create()
+                        player.total = value
+                        player.address = str(address)
+                        player.block = self.block_height
+                    else:
+                        player.total = player.total + value
+                    self._tickets.add_or_update(ticket)
+                    self._players.add_or_update(player)
+                    open_draw.prize = open_draw.prize + value
+                    self._drawbox.update_open(open_draw)
+                else:
+                    self.icx.transfer(self.msg.sender, self.msg.value)
+            except Exception as e:
+                revert(f'Megaloop was unable to process your transaction. Error: {str(e)}')
     
-    ###################################################################################
+    #######################################################################################
     
     @external
     def close_draw(self):
         open_draw = self._drawbox.get_open()
         if (open_draw and self._tickets):
-            prize = open_draw.total_prize_payout
+            prize = open_draw.total_prize_pay
             if self.icx.get_balance(self.address) < prize:
                 revert(f'Insufficient fund. {prize/10**18} ICX required.')
             try:
@@ -118,12 +118,17 @@ class Megaloop(IconScoreBase):
             except Exception as e:
                 revert(f'Failed to process transaction. Error: {str(e)}')
 
-    ###################################################################################
+    #######################################################################################
 
     @external(readonly=True)
     def name(self) -> str:
         return 'MEGALOOP v2.0.0'
 
+    @external(readonly=True)
+    def get_open_draw(self) -> str:
+        draw = self._drawbox.get_open()
+        return None if not draw else str(draw)
+        
     @external(readonly=True)
     def get_last_draw(self) -> str:
         draw = self._drawbox.get_last()
@@ -148,6 +153,10 @@ class Megaloop(IconScoreBase):
     def get_last_sponsor(self) -> str:
         sponsor = self._sponsors.get_last()
         return None if not sponsor else str(sponsor)
+
+    @external(readonly=True)
+    def get_draws(self) -> str:
+        return [str(draw) for draw in self._drawbox]
 
     @external(readonly=True)
     def get_tickets(self) -> str:

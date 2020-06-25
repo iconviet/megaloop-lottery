@@ -21,7 +21,7 @@ from .jsondict import *
 
 class DrawBox(JsonDictDB):
     
-    def get_open(self) -> Draw:
+    def get_open(self):
         json = self._open_draw.get()
         if not json:
             return None
@@ -34,8 +34,8 @@ class DrawBox(JsonDictDB):
         else:
             raise Exception('Open draw number mismatched')
 
-    def open(self, bh:int, topup:int) -> Draw:
-        if (not bh):
+    def open(self, bh:int, topup:int):
+        if bh:
             draw = self.get_open()
             last = self.get_last()
             if not draw:
@@ -43,18 +43,19 @@ class DrawBox(JsonDictDB):
                 draw.topup = topup
                 draw.bh_opened = bh
                 draw.number = 1 if not last else last.number + 1
-                self._open_draw.set(draw)
+                self._open_draw.set(str(draw))
                 return draw
             raise Exception('Draw is already opened')
         raise Exception('Opened block height required')
     
     def close(self, bh:int, prize:int):
-        if not (bh and prize):
+        if bh:
             draw = self.get_open()
             if draw:
                 draw.bh_closed = bh
                 self[draw.number] = draw
                 self._open_draw.remove()
+                return
             else:
                 raise Exception('Draw is not yet opened')
         raise Exception('Closed block height and prize required')

@@ -21,7 +21,9 @@ from .jsonbase import *
 class Draw(JsonBase):
     
     def __init__(self, json:str=None):
-        if not json:
+        if json:
+            super().__init__(json)
+        else:
             # schema
             self.topup = None
             self.prize = None
@@ -30,19 +32,17 @@ class Draw(JsonBase):
             self.bh_closed = None
             self.tx_opened = None
             self.tx_closed = None
-            self.payout_ratio = None
-        else:
-            super().__init__(json)
+            self.pay_ratio = None
     
     @property
     def total_prize(self):
         return self.prize + self.topup
     
     @property
-    def total_prize_payout(self):
-        return self.total_prize * self.payout_ratio
+    def total_prize_pay(self):
+        return self.total_prize * self.pay_ratio
 
-    def get_winning_ticket(self, score:IconScoreBase, tickets:Tickets) -> Ticket:
+    def get_winning_ticket(self, score:IconScoreBase, tickets:Tickets):
         chances = [Ticket(ticket).total / self.prize for ticket in tickets]
         seed = str(score.now() +str(self.prize) + str(len(tickets)) + str(bytes.hex(score.tx.hash)))
         distance = sum(chances) * int.from_bytes(sha3_256(seed.encode()), 'big') % 100000 / 100000.0
