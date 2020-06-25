@@ -17,9 +17,9 @@
 # pylint: disable=W0614
 from .consts import *
 from .sponsor import *
-from .dictbase import *
+from .jsondict import *
 
-class Sponsors(DictBase):
+class Sponsors(JsonDictDB):
     
     def create(self) -> Sponsor:
         sponsor = Sponsor()
@@ -27,14 +27,14 @@ class Sponsors(DictBase):
         return sponsor
 
     def add_or_update(self, sponsor:Sponsor):
-        self[str(sponsor.address)] = sponsor
+        self[sponsor.address] = sponsor
 
     def get_last(self) -> Sponsor:
         if not self: return None
-        return Sponsor(super().get(len(self) - 1))
+        return Sponsor(self.get(len(self) - 1))
     
     def __getitem__(self, key) -> Sponsor:
-        json = super().__getitem__(str(key))
+        json = super().__getitem__(key)
         return None if not json else Sponsor(json)
 
     def __init__(self, db:IconScoreDatabase):

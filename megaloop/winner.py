@@ -19,7 +19,7 @@ from .jsonbase import *
 
 class Winner(JsonBase):
     def __init__(self, json:str=None):
-        if json:
+        if not json:
             # schema
             self.bh = None
             self.name = None

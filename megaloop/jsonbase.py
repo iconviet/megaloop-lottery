@@ -18,17 +18,8 @@
 from iconservice import *
 
 class JsonBase(object):
+    def __repr__(self):
+        return json_dumps(self.__dict__)
+
     def __init__(self, json:str=None):
-        if not json:
-            self.version = None
-        else:
-            self.deserialize(json)
-    
-    def __str__(self):
-        return json_dumps(self.__dict__)
-
-    def serialize(self) -> str:
-        return json_dumps(self.__dict__)
-
-    def deserialize(self, json:str):
-        self.__dict__ = json_loads(json)
+        if json: self.__dict__ = json_loads(json)

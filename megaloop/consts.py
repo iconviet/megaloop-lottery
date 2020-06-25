@@ -15,9 +15,9 @@
 # limitations under the License.
 
 VERSION = 1
-DRAW_DICT = 'draws'
-TICKET_DICT = 'tickets'
-PLAYER_DICT = 'players'
-WINNER_DICT = 'winners'
+DRAWBOX_DICT = 'drawbox'
+TICKETS_DICT = 'tickets'
+PLAYERS_DICT = 'players'
+WINNERS_DICT = 'winners'
 SPONSOR_DICT = 'sponsors'
-OPEN_DRAW_VAR = 'open_draw'
+OPENDRAW_VAR = 'opendraw'

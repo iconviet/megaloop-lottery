@@ -17,9 +17,9 @@
 # pylint: disable=W0614
 from .consts import *
 from .winner import *
-from .dictbase import *
+from .jsondict import *
 
-class Winners(DictBase):
+class Winners(JsonDictDB):
     
     def create(self) -> Winner:
         winner = Winner()
@@ -27,15 +27,15 @@ class Winners(DictBase):
         return winner
 
     def add_or_update(self, winner:Winner):
-        self[str(winner.address)] = winner
+        self[winner.address] = winner
 
     def get_last(self) -> Winner:
         if not self: return None
-        return Winner(super().get(len(self) - 1))
+        return Winner(self.get(len(self) - 1))
     
     def __getitem__(self, key) -> Winner:
-        json = super().__getitem__(str(key))
+        json = super().__getitem__(key)
         return None if not json else Winner(json)    
 
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(WINNER_DICT, db, value_type=str)
+        super().__init__(WINNERS_DICT, db, value_type=str)

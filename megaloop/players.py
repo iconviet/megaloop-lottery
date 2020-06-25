@@ -17,9 +17,9 @@
 # pylint: disable=W0614
 from .consts import *
 from .player import *
-from .dictbase import *
+from .jsondict import *
 
-class Players(DictBase):
+class Players(JsonDictDB):
     
     def create(self) -> Player:
         player = Player()
@@ -27,15 +27,15 @@ class Players(DictBase):
         return player
 
     def add_or_update(self, player:Player):
-        self[str(player.address)] = player
+        self[player.address] = player
 
     def get_last(self) -> Player:
         if not self: return None
-        return Player(super().get(len(self) - 1))
+        return Player(self.get(len(self) - 1))
     
     def __getitem__(self, key) -> Player:
-        json = super().__getitem__(str(key))
+        json = super().__getitem__(key)
         return None if not json else Player(json)
 
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(PLAYER_DICT, db, value_type=str)
+        super().__init__(PLAYERS_DICT, db, value_type=str)

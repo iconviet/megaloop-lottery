@@ -19,17 +19,17 @@ from .jsonbase import *
 from iconservice import *
 from .scorelib.iterable_dict import *
 
-class DictBase(IterableDictDB):
+class JsonDictDB(IterableDictDB):
     
     def __iter__(self):
         for value in self.values():
             yield value
     
+    def __setitem__(self, key, value):
+        super().__setitem__(key, str(value))
+
     def get(self, index:int) -> str:
         return self._values[self._keys[index]]
-    
-    def __setitem__(self, key, value:JsonBase):
-        super().__setitem__(self, value.serialize())    
     
     def __init__(self, var_key: str, db: IconScoreDatabase, value_type: type):
         super().__init__(var_key, db, value_type, True)

@@ -17,9 +17,9 @@
 # pylint: disable=W0614
 from .consts import *
 from .ticket import *
-from .dictbase import *
+from .jsondict import *
 
-class Tickets(DictBase):
+class Tickets(JsonDictDB):
     
     def create(self) -> Ticket:
         ticket = Ticket()
@@ -27,15 +27,15 @@ class Tickets(DictBase):
         return ticket
 
     def add_or_update(self, ticket:Ticket):
-        self[str(ticket.address)] = ticket
+        self[ticket.address] = ticket
     
     def get_last(self) -> Ticket:
         if not self: return None
-        return Ticket(super().get(len(self) - 1))
+        return Ticket(self.get(len(self) - 1))
 
     def __getitem__(self, key) -> Ticket:
-        json = super().__getitem__(str(key))
+        json = super().__getitem__(key)
         return None if not json else Ticket(json)
     
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(TICKET_DICT, db, value_type=str)
+        super().__init__(TICKETS_DICT, db, value_type=str)

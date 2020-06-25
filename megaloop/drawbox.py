@@ -17,9 +17,9 @@
 # pylint: disable=W0614
 from .draw import *
 from .consts import *
-from .dictbase import *
+from .jsondict import *
 
-class DrawBox(DictBase):
+class DrawBox(JsonDictDB):
     
     def get_open(self) -> Draw:
         json = self._open_draw.get()
@@ -64,5 +64,5 @@ class DrawBox(DictBase):
         raise Exception('Closed block height and prize required')
 
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(DRAW_DICT, db, value_type=str)
-        self._open_draw = VarDB(OPEN_DRAW_VAR, db, value_type=str)
+        super().__init__(DRAWBOX_DICT, db, value_type=str)
+        self._open_draw = VarDB(OPENDRAW_VAR, db, value_type=str)
