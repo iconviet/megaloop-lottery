@@ -27,10 +27,6 @@ class DrawBox(JsonDictDB):
             return None
         return Draw(json)
     
-    def get_last(self) -> Draw:
-        if not self: return None
-        return Draw(super().get(len(self) - 1))
-    
     def update_open(self, this:Draw):
         draw = self.get_open()
         if (draw and draw.number == this.number):
@@ -64,5 +60,5 @@ class DrawBox(JsonDictDB):
         raise Exception('Closed block height and prize required')
 
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(DRAWBOX_DICT, db, value_type=str)
+        super().__init__(DRAWBOX_DICT, db, Draw)
         self._open_draw = VarDB(OPENDRAW_VAR, db, value_type=str)

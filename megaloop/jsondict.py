@@ -21,9 +21,14 @@ from .scorelib.iterable_dict import *
 
 class JsonDictDB(IterableDictDB):
     
+    def create(self) -> type:
+        instance = self._type()
+        instance.version = 1
+        return instance
+
     def __iter__(self):
         for value in self.values():
-            yield value
+            yield self._type(value)
     
     def __setitem__(self, key, value):
         super().__setitem__(key, str(value))
@@ -31,6 +36,15 @@ class JsonDictDB(IterableDictDB):
     def get(self, index:int) -> str:
         return self._values[self._keys[index]]
     
-    def __init__(self, var_key: str, db: IconScoreDatabase, value_type: type):
-        super().__init__(var_key, db, value_type, True)
+    def get_last(self) -> type:
+        if not self: return None
+        return self._type(self.get(len(self) - 1))
+    
+    def __getitem__(self, key) -> type:
+        json = super().__getitem__(key)
+        return None if not json else self._type(json)
+    
+    def __init__(self, key: str, db: IconScoreDatabase, type:type):
+        self._type = type
+        super().__init__(key, db, str, True)
     

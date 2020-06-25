@@ -21,21 +21,8 @@ from .jsondict import *
 
 class Winners(JsonDictDB):
     
-    def create(self) -> Winner:
-        winner = Winner()
-        winner.version = 1
-        return winner
-
     def add_or_update(self, winner:Winner):
         self[winner.address] = winner
 
-    def get_last(self) -> Winner:
-        if not self: return None
-        return Winner(self.get(len(self) - 1))
-    
-    def __getitem__(self, key) -> Winner:
-        json = super().__getitem__(key)
-        return None if not json else Winner(json)    
-
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(WINNERS_DICT, db, value_type=str)
+        super().__init__(WINNERS_DICT, db, Winner)

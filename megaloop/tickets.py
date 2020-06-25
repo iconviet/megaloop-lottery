@@ -21,21 +21,8 @@ from .jsondict import *
 
 class Tickets(JsonDictDB):
     
-    def create(self) -> Ticket:
-        ticket = Ticket()
-        ticket.version = 1
-        return ticket
-
     def add_or_update(self, ticket:Ticket):
         self[ticket.address] = ticket
     
-    def get_last(self) -> Ticket:
-        if not self: return None
-        return Ticket(self.get(len(self) - 1))
-
-    def __getitem__(self, key) -> Ticket:
-        json = super().__getitem__(key)
-        return None if not json else Ticket(json)
-    
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(TICKETS_DICT, db, value_type=str)
+        super().__init__(TICKETS_DICT, db, Ticket)

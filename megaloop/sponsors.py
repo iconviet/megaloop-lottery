@@ -21,21 +21,8 @@ from .jsondict import *
 
 class Sponsors(JsonDictDB):
     
-    def create(self) -> Sponsor:
-        sponsor = Sponsor()
-        sponsor.version = 1
-        return sponsor
-
     def add_or_update(self, sponsor:Sponsor):
         self[sponsor.address] = sponsor
 
-    def get_last(self) -> Sponsor:
-        if not self: return None
-        return Sponsor(self.get(len(self) - 1))
-    
-    def __getitem__(self, key) -> Sponsor:
-        json = super().__getitem__(key)
-        return None if not json else Sponsor(json)
-
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(SPONSOR_DICT, db, value_type=str)
+        super().__init__(SPONSOR_DICT, db, Sponsor)
