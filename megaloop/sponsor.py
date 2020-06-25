@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#
+
 # Copyright 2020 ICONVIET
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +15,14 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from iconservice import *
-from .scorelib.iterable_dict import *
+from .jsonbase import *
 
-class JsonListBase(IterableDictDB):
-    
-    def __iter__(self):
-        for value in self.values():
-            yield value
-    
-    def __init__(self, var_key: str, db: IconScoreDatabase, value_type: type):
-        super().__init__(var_key, db, value_type, True)
-    
+class Sponsor(JsonBase):
+    def __init__(self, json:str=None):
+        if not json:
+            # schema
+            self.debit = None
+            self.credit = None
+            self.address = None
+        else:
+            super().__init__(json)

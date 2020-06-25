@@ -21,8 +21,8 @@ class Ticket(JsonBase):
     def __init__(self, json:str=None):
         if not json:
             # schema
+            self.bh = None
             self.total = None
-            self.block = None
             self.address = None
         else:
             super().__init__(json)

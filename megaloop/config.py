@@ -20,11 +20,11 @@ from iconservice import *
 class Config(object):
     
     def save(self):
-        self._db.set(json_dumps(self.__dict__))
+        self._config.set(json_dumps(self.__dict__))
 
     def __init__(self, db:IconScoreDatabase):
-        self._db = VarDB('config', db, value_type=str)
-        if not self._db.get():
-            self.enabled = True
+        self._config = VarDB('config', db, value_type=str)
+        if not self._config.get():
+            self.payout_ratio = None
         else:
-            self.__dict__ = json_loads(self._db.get())
+            self.__dict__ = json_loads(self._config.get())

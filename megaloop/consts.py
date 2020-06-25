@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 # Copyright 2020 ICONVIET
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,16 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=W0614
-from .jsonbase import *
-
-class Winner(JsonBase):
-    def __init__(self, json:str=None):
-        if json:
-            # schema
-            self.bh = None
-            self.name = None
-            self.total = None
-            self.address = None
-        else:
-            super().__init__(json)
+VERSION = 1
+DRAW_DICT = 'draws'
+TICKET_DICT = 'tickets'
+PLAYER_DICT = 'players'
+WINNER_DICT = 'winners'
+SPONSOR_DICT = 'sponsors'
+OPEN_DRAW_VAR = 'open_draw'

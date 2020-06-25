@@ -15,24 +15,27 @@
 # limitations under the License.
 
 # pylint: disable=W0614
+from .consts import *
 from .winner import *
-from .jsonlistbase import *
+from .dictbase import *
 
-class Winners(JsonListBase):
+class Winners(DictBase):
     
-    def add(self, winner:Winner):
-        self[winner.address] = winner.to_json()
+    def create(self) -> Winner:
+        winner = Winner()
+        winner.version = 1
+        return winner
 
-    def update(self, winner:Winner):
-        self[winner.address] = winner.to_json()
+    def add_or_update(self, winner:Winner):
+        self[str(winner.address)] = winner
 
     def get_last(self) -> Winner:
         if not self: return None
         return Winner(super().get(len(self) - 1))
     
-    def get(self, address:str) -> Winner:
-        json = self[address]
-        return None if not json else Winner(json)
+    def __getitem__(self, key) -> Winner:
+        json = super().__getitem__(str(key))
+        return None if not json else Winner(json)    
 
     def __init__(self, db:IconScoreDatabase):
-        super().__init__('winners', db, value_type=str)
+        super().__init__(WINNER_DICT, db, value_type=str)

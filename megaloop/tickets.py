@@ -15,24 +15,27 @@
 # limitations under the License.
 
 # pylint: disable=W0614
+from .consts import *
 from .ticket import *
-from .jsonlistbase import *
+from .dictbase import *
 
-class Tickets(JsonListBase):
+class Tickets(DictBase):
     
-    def add(self, ticket:Ticket):
-        self[ticket.address] = ticket.to_json()
+    def create(self) -> Ticket:
+        ticket = Ticket()
+        ticket.version = 1
+        return ticket
 
-    def update(self, ticket:Ticket):
-        self[ticket.address] = ticket.to_json()
-
+    def add_or_update(self, ticket:Ticket):
+        self[str(ticket.address)] = ticket
+    
     def get_last(self) -> Ticket:
         if not self: return None
         return Ticket(super().get(len(self) - 1))
 
-    def get(self, address:str) -> Ticket:
-        json = self[address]
+    def __getitem__(self, key) -> Ticket:
+        json = super().__getitem__(str(key))
         return None if not json else Ticket(json)
     
     def __init__(self, db:IconScoreDatabase):
-        super().__init__('tickets', db, value_type=str)
+        super().__init__(TICKET_DICT, db, value_type=str)
