@@ -19,4 +19,12 @@ from .jsonbase import *
 
 class Winner(JsonBase):
     def __init__(self, json:str=None):
-        super().__init__(json)
+        if json:
+            # schema
+            self.name = None
+            self.total = None
+            self.prize = None
+            self.block = None
+            self.address = None
+        else:
+            super().__init__(json)

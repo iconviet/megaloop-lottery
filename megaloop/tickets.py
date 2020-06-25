@@ -16,14 +16,9 @@
 
 # pylint: disable=W0614
 from .ticket import *
-from iconservice import *
-from .scorelib.iterable_dict import *
+from .jsonlistbase import *
 
-class Tickets(IterableDictDB):
-    
-    def __iter__(self):
-        for value in self.values():
-            yield value
+class Tickets(JsonListBase):
     
     def add(self, ticket:Ticket):
         self[ticket.address] = ticket.to_json()
@@ -40,4 +35,4 @@ class Tickets(IterableDictDB):
         return None if not json else Ticket(json)
     
     def __init__(self, db:IconScoreDatabase):
-        super().__init__('tickets', db, value_type=str, order=True)
+        super().__init__('tickets', db, value_type=str)

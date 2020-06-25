@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+#
 # Copyright 2020 ICONVIET
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,15 +16,14 @@
 
 # pylint: disable=W0614
 from iconservice import *
+from .scorelib.iterable_dict import *
 
-class Configs(object):
+class JsonListBase(IterableDictDB):
     
-    def save(self):
-        self._db.set(json_dumps(self.__dict__))
-
-    def __init__(self, db:IconScoreDatabase):
-        self._db = VarDB('config', db, value_type=str)
-        if not self._db.get():
-            self.enabled = True
-        else:
-            self.__dict__ = json_loads(self._db.get())
+    def __iter__(self):
+        for value in self.values():
+            yield value
+    
+    def __init__(self, var_key: str, db: IconScoreDatabase, value_type: type):
+        super().__init__(var_key, db, value_type, True)
+    

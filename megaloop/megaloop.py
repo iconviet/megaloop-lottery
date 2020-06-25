@@ -15,10 +15,10 @@
 # limitations under the License.
 
 # pylint: disable=W0614
+from .config import *
 from .ticket import *
 from .player import *
 from .winner import *
-from .configs import *
 from .tickets import *
 from .players import *
 from .winners import *
@@ -42,7 +42,7 @@ class Megaloop(IconScoreBase):
     def __init__(self, db: IconScoreDatabase):
         super().__init__(db)
         
-        self._configs = Configs(db)
+        self._config = Config(db)
         self._tickets = Tickets(db)
         self._players = Players(db)
         self._winners = Winners(db)
@@ -67,7 +67,7 @@ class Megaloop(IconScoreBase):
             return
         if value == 0:
             revert('Zero value is not allowed')
-        # if not self._configs.enabled:
+        # if not self._config.enabled:
         #     revert('Contract is currently disabled')
         if self._last_draw_bh.get() == self.block_height:
             revert('Draw in progress. Deposit is not allowed')
@@ -78,26 +78,26 @@ class Megaloop(IconScoreBase):
                 # create ticket
                 ticket = Ticket()
                 ticket.version = 1
-                ticket.value = value
+                ticket.total = value
                 ticket.address = str(address)
                 ticket.block = self.block_height
                 self._tickets.add(ticket)
             else:
                 # replace ticket
                 ticket.block = self.block_height
-                ticket.value = ticket.value + value
+                ticket.total = ticket.total + value
                 self._tickets.update(ticket)
             if not player:
                 # create player
                 player = Player()
                 player.version = 1
-                player.value = value
+                player.total = value
                 player.address = str(address)
                 player.block = self.block_height
                 self._players.add(player)
             else:
                 # update player
-                player.value = player.value + value
+                player.total = player.total + value
                 self._players.update(player)
             self._draw_prize.set(self._draw_prize.get() + value)
         except Exception as e:
@@ -148,7 +148,7 @@ class Megaloop(IconScoreBase):
             """
             3. start calculating winning ticket chances
             """
-            chances = [Ticket(ticket).value / draw_prize for ticket in self._tickets]
+            chances = [Ticket(ticket).total / draw_prize for ticket in self._tickets]
             index = self._calculate(chances)
             try:
                 """

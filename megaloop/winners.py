@@ -16,15 +16,10 @@
 
 # pylint: disable=W0614
 from .winner import *
-from iconservice import *
-from .scorelib.iterable_dict import *
+from .jsonlistbase import *
 
-class Winners(IterableDictDB):
+class Winners(JsonListBase):
     
-    def __iter__(self):
-        for value in self.values():
-            yield value
-
     def add(self, winner:Winner):
         self[winner.address] = winner.to_json()
 
@@ -40,4 +35,4 @@ class Winners(IterableDictDB):
         return None if not json else Winner(json)
 
     def __init__(self, db:IconScoreDatabase):
-        super().__init__('winners', db, value_type=str, order=True)
+        super().__init__('winners', db, value_type=str)

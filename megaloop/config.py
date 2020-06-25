@@ -15,15 +15,16 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .jsonbase import *
+from iconservice import *
 
-class Player(JsonBase):
-    def __init__(self, json:str=None):
-        if not json:
-            # schema
-            self.name = None
-            self.total = None
-            self.block = None
-            self.address = None
+class Config(object):
+    
+    def save(self):
+        self._db.set(json_dumps(self.__dict__))
+
+    def __init__(self, db:IconScoreDatabase):
+        self._db = VarDB('config', db, value_type=str)
+        if not self._db.get():
+            self.enabled = True
         else:
-            super().__init__(json)
+            self.__dict__ = json_loads(self._db.get())
