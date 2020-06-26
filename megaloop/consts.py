@@ -14,10 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-VERSION = 1
+JSON_VERSION = 1
+
+CONFIG_JSON = 'config'
 DRAWBOX_DICT = 'drawbox'
 TICKETS_DICT = 'tickets'
 PLAYERS_DICT = 'players'
 WINNERS_DICT = 'winners'
-SPONSOR_DICT = 'sponsors'
-OPENDRAW_VAR = 'opendraw'
+TOPPERS_DICT = 'toppers'
+OPEN_DRAW_JSON = 'open_draw'
+
+def to_loop(coin:int) -> int: return coin * 10**18
+
+def to_coin(loop:int) -> float: return loop / 10**18
+
+def to_percent(value:int) -> float: return value / 100

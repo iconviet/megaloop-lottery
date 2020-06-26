@@ -17,12 +17,11 @@
 # pylint: disable=W0614
 from .jsonbase import *
 
-class Sponsor(JsonBase):
+class Topper(JsonBase):
     def __init__(self, json:str=None):
         if not json:
             # schema
-            self.debit = None
-            self.credit = None
+            self.balance = 0
             self.address = None
         else:
             super().__init__(json)

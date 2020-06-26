@@ -15,14 +15,27 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .consts import *
-from .sponsor import *
-from .jsondict import *
+from iconservice import *
 
-class Sponsors(JsonDictDB):
-    
-    def add_or_update(self, sponsor:Sponsor):
-        self[sponsor.address] = sponsor
+class Instant(object):
+     
+   @property
+   def bh(self) -> int:
+      return self._bh
 
-    def __init__(self, db:IconScoreDatabase):
-        super().__init__(SPONSOR_DICT, db, Sponsor)
+   @property
+   def tt(self) -> int:
+      return self._tt
+
+   @property
+   def tx(self) -> str:
+      return self._tx
+
+   def __repr__(self):
+      return f'{self.bh}_{self.tt}'
+
+   def __init__(self, icon:IconScoreBase):
+      self._tt = icon.now()
+      self._bh = icon.block_height
+      self._tx = None if not icon.tx else f'0x{bytes.hex(icon.tx.hash)}'
+            

@@ -15,14 +15,14 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .jsonbase import *
+from .consts import *
+from .topper import *
+from .jsondict import *
 
-class Ticket(JsonBase):
-    def __init__(self, json:str=None):
-        if not json:
-            # schema
-            self.bh = 0
-            self.total = 0
-            self.address = None
-        else:
-            super().__init__(json)
+class Toppers(JsonDictDB):
+    
+    def save(self, topper:Topper):
+        self[topper.address] = topper
+
+    def __init__(self, db:IconScoreDatabase):
+        super().__init__(TOPPERS_DICT, db, Topper)

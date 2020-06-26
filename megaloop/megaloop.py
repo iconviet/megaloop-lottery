@@ -15,49 +15,61 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .config import *
 from .ticket import *
 from .player import *
 from .winner import *
-from .sponsor import *
+from .topper import *
+from .config import *
 from .drawbox import *
+from .instant import *
 from .tickets import *
 from .players import *
 from .winners import *
-from .sponsors import *
+from .toppers import *
 from iconservice import *
 from .scorelib.set import *
 from .scorelib.iterable_dict import *
 
-class Megaloop(IconScoreBase):
-        
+class Megaloop(IconScoreBase):    
+
+    @property
+    def _instant(self) -> Instant:
+        return Instant(self)
+
     def __init__(self, db: IconScoreDatabase):
         super().__init__(db)
-        
-        self._config = Config(db)
+                
         self._drawbox = DrawBox(db)
         self._tickets = Tickets(db)
         self._players = Players(db)
         self._winners = Winners(db)
-        self._sponsors = Sponsors(db)
+        self._toppers = Toppers(db)
+        self._config = VarDB(CONFIG_JSON, db, value_type=str)
         
     def on_install(self):
         super().on_install()
         
-        sponsor = self._sponsors.create()
-        sponsor.debit = 0
-        sponsor.credit = 0
-        sponsor.address = str(self.owner)
-        self._sponsors.add_or_update(sponsor)
+        topper = self._toppers.create()
+        topper.address = str(self.owner)
+        self._toppers.save(topper)
+        
+        config = Config(self._config.get())
+        config.draw_topping = to_loop(5)
+        config.payout_ratio = to_percent(85)
+        self._config.set(str(config))
+        
+        self._drawbox.open(config, self._instant)
 
     def on_update(self):
         super().on_update()
+
+        config = Config(self._config.get())
+        config.draw_topping = to_loop(10)
+        config.payout_ratio = to_percent(80)
+        self._config.set(str(config))
         
-        self._config.pay_ratio = .85
-        self._config.topup_limit = 5
-        self._config.prize_limit = 1000
-        #self._drawbox.close(self.block_height, 0)
-        #self._drawbox.open(self.block_height, 5)
+        self._drawbox.close(config, self._instant)
+        self._drawbox.open(config, self._instant)
 
     #######################################################################################
 
@@ -65,7 +77,7 @@ class Megaloop(IconScoreBase):
     def fallback(self):
         value = self.msg.value
         address = str(self.msg.sender)
-        if address in self._sponsors: return
+        if address in self._toppers: return
         if value:
             try:
                 open_draw = self._drawbox.get_open()
@@ -76,21 +88,21 @@ class Megaloop(IconScoreBase):
                         ticket = self._tickets.create()
                         ticket.total = value
                         ticket.address = str(address)
-                        ticket.block = self.block_height
+                        ticket.bh = self.block_height
                     else:
-                        ticket.block = self.block_height
+                        ticket.bh = self.block_height
                         ticket.total = ticket.total + value
                     if not player:
                         player =self._players.create()
                         player.total = value
                         player.address = str(address)
-                        player.block = self.block_height
+                        player.bh = self.block_height
                     else:
                         player.total = player.total + value
-                    self._tickets.add_or_update(ticket)
-                    self._players.add_or_update(player)
-                    open_draw.prize = open_draw.prize + value
-                    self._drawbox.update_open(open_draw)
+                    self._tickets.save(ticket)
+                    self._players.save(player)
+                    # open_draw.prize = open_draw.prize + value
+                    self._drawbox.set_open(open_draw)
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)
             except Exception as e:
@@ -99,24 +111,27 @@ class Megaloop(IconScoreBase):
     #######################################################################################
     
     @external
-    def close_draw(self):
-        open_draw = self._drawbox.get_open()
-        if (open_draw and self._tickets):
-            prize = open_draw.total_prize_pay
-            if self.icx.get_balance(self.address) < prize:
-                revert(f'Insufficient fund. {prize/10**18} ICX required.')
+    def open(self):
+        self._drawbox.open(self._instant, self._config)
+    
+    @external
+    def draw(self):
             try:
-                ticket = open_draw.get_winning_ticket(self, self._tickets)
-                if ticket:    
-                    winner = self._winners.create()
-                    winner.prize = prize
-                    winner.address = ticket.address
-                    winner.block = self.block_height
-                    self._winners.add_or_update(winner)
-                    self.draws.close(self.block_height)
-                    self.icx.transfer(ticket.address, prize)
+                draw = self._drawbox.get_open()
+                if self.icx.get_balance(self.address) < draw.payout:
+                    raise Exception(f'{to_coin(draw.payout)} ICX is required.')
+                if draw and self._tickets:
+                    ticket = draw.random(self, self._tickets)
+                    if ticket:    
+                        winner = self._winners.create()
+                        winner.total += draw.payout
+                        winner.bh = self.block_height
+                        winner.address = ticket.address
+                        self._winners.save(winner)                    
+                        self._drawbox.close(self._instant, self._config)
+                        self.icx.transfer(winner.address, draw.payout)
             except Exception as e:
-                revert(f'Failed to process transaction. Error: {str(e)}')
+                revert(f'Failed to process drawing transaction. Error: {str(e)}')
 
     #######################################################################################
 
@@ -124,6 +139,10 @@ class Megaloop(IconScoreBase):
     def name(self) -> str:
         return 'MEGALOOP v2.0.0'
 
+    @external(readonly=True)
+    def get_config(self) -> str:
+        return self._config.get()
+    
     @external(readonly=True)
     def get_open_draw(self) -> str:
         draw = self._drawbox.get_open()
@@ -150,9 +169,9 @@ class Megaloop(IconScoreBase):
         return None if not winner else str(winner)
 
     @external(readonly=True)
-    def get_last_sponsor(self) -> str:
-        sponsor = self._sponsors.get_last()
-        return None if not sponsor else str(sponsor)
+    def get_last_topper(self) -> str:
+        topper = self._toppers.get_last()
+        return None if not topper else str(topper)
 
     @external(readonly=True)
     def get_draws(self) -> str:
@@ -171,5 +190,5 @@ class Megaloop(IconScoreBase):
         return [str(winner) for winner in self._winners]
 
     @external(readonly=True)
-    def get_sponsors(self) -> str:
-        return [str(sponsor) for sponsor in self._sponsors]
+    def get_toppers(self) -> str:
+        return [str(topper) for topper in self._toppers]

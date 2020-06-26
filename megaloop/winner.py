@@ -21,9 +21,9 @@ class Winner(JsonBase):
     def __init__(self, json:str=None):
         if not json:
             # schema
-            self.bh = None
-            self.name = None
-            self.total = None
+            self.bh = 0
+            self.total = 0
+            self.uname = None
             self.address = None
         else:
             super().__init__(json)

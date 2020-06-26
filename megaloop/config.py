@@ -15,16 +15,13 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from iconservice import *
+from .jsonbase import *
 
-class Config(object):
+class Config(JsonBase):
     
-    def save(self):
-        self._config.set(json_dumps(self.__dict__))
-
-    def __init__(self, db:IconScoreDatabase):
-        self._config = VarDB('config', db, value_type=str)
-        if not self._config.get():
-            self.pay_ratio = None
+    def __init__(self, json:str=None):
+        if not json:
+            self.draw_topping = 0
+            self.payout_ratio = 0
         else:
-            self.__dict__ = json_loads(self._config.get())
+            super().__init__(json)

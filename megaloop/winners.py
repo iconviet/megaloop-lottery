@@ -21,7 +21,7 @@ from .jsondict import *
 
 class Winners(JsonDictDB):
     
-    def add_or_update(self, winner:Winner):
+    def save(self, winner:Winner):
         self[winner.address] = winner
 
     def __init__(self, db:IconScoreDatabase):

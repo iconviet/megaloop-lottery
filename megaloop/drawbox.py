@@ -17,6 +17,8 @@
 # pylint: disable=W0614
 from .draw import *
 from .consts import *
+from .config import *
+from .instant import *
 from .jsondict import *
 
 class DrawBox(JsonDictDB):
@@ -27,39 +29,41 @@ class DrawBox(JsonDictDB):
             return None
         return Draw(json)
     
-    def update_open(self, this:Draw):
+    def set_open(self, this:Draw):
         draw = self.get_open()
-        if (draw and draw.number == this.number):
-            self[draw.number] = this
-        else:
-            raise Exception('Open draw number mismatched')
+        if draw and draw.number == this.number:
+            self._open_draw.set(str(this))
+            return
+        raise Exception('Open draw number mismatched')
 
-    def open(self, bh:int, topup:int):
-        if bh:
+    def open(self, config:Config, instant:Instant):
+        if instant.bh:
             draw = self.get_open()
             last = self.get_last()
             if not draw:
                 draw = Draw()
-                draw.topup = topup
-                draw.bh_opened = bh
+                draw.bh_opened = instant.bh
+                draw.topping = config.draw_topping
+                draw.payout_ratio = config.payout_ratio
+                if instant.tx: draw.tx_opened = instant.tx
                 draw.number = 1 if not last else last.number + 1
                 self._open_draw.set(str(draw))
                 return draw
-            raise Exception('Draw is already opened')
-        raise Exception('Opened block height required')
+            raise Exception('Draw already opened')
+        raise Exception('Opened block required')
     
-    def close(self, bh:int, prize:int):
-        if bh:
+    def close(self, config:Config, instant:Instant):
+        if instant.bh:
             draw = self.get_open()
             if draw:
-                draw.bh_closed = bh
+                draw.bh_closed = instant.bh
+                if instant.tx: draw.tx_closed = instant.tx
                 self[draw.number] = draw
                 self._open_draw.remove()
                 return
-            else:
-                raise Exception('Draw is not yet opened')
-        raise Exception('Closed block height and prize required')
+            raise Exception('Draw not yet opened')
+        raise Exception('Closed block required')
 
     def __init__(self, db:IconScoreDatabase):
         super().__init__(DRAWBOX_DICT, db, Draw)
-        self._open_draw = VarDB(OPENDRAW_VAR, db, value_type=str)
+        self._open_draw = VarDB(OPEN_DRAW_JSON, db, value_type=str)

@@ -21,7 +21,7 @@ from .jsondict import *
 
 class Tickets(JsonDictDB):
     
-    def add_or_update(self, ticket:Ticket):
+    def save(self, ticket:Ticket):
         self[ticket.address] = ticket
     
     def __init__(self, db:IconScoreDatabase):
