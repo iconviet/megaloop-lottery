@@ -34,7 +34,7 @@ class DrawBox(JsonDictDB):
         if draw and draw.number == this.number:
             self._open_draw.set(str(this))
             return
-        raise Exception('Open draw number mismatched')
+        raise Exception('draw number mismatched')
 
     def open(self, config:Config, instant:Instant):
         if instant.bh:
@@ -49,8 +49,8 @@ class DrawBox(JsonDictDB):
                 draw.number = 1 if not last else last.number + 1
                 self._open_draw.set(str(draw))
                 return draw
-            raise Exception('Draw already opened')
-        raise Exception('Opened block required')
+            raise Exception('draw already opened')
+        raise Exception('opened block required')
     
     def close(self, config:Config, instant:Instant):
         if instant.bh:
@@ -61,8 +61,8 @@ class DrawBox(JsonDictDB):
                 self[draw.number] = draw
                 self._open_draw.remove()
                 return
-            raise Exception('Draw not yet opened')
-        raise Exception('Closed block required')
+            raise Exception('draw not yet opened')
+        raise Exception('closed block required')
 
     def __init__(self, db:IconScoreDatabase):
         super().__init__(DRAWBOX_DICT, db, Draw)

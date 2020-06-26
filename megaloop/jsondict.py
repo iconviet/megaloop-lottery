@@ -37,12 +37,12 @@ class JsonDictDB(IterableDictDB):
     def __setitem__(self, key, value):
         super().__setitem__(key, str(value))
 
-    def get(self, index:int) -> str:
-        return self._values[self._keys[index]]
-    
     def __getitem__(self, key) -> type:
         json = super().__getitem__(key)
         return None if not json else self._type(json)
+
+    def get(self, index:int) -> str:
+        return self._type(self._values[self._keys[index]])
     
     def __init__(self, key: str, db: IconScoreDatabase, type:type):
         self._type = type

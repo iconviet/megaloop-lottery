@@ -65,13 +65,17 @@ class Megaloop(IconScoreBase):
 
         self.draw()
 
-    #######################################################################################
+    ###################################################################
 
     @payable
     def fallback(self):
         value = self.msg.value
         address = str(self.msg.sender)
-        if address in self._toppers: return
+        if address in self._toppers:
+            topper = self._toppers[address]
+            topper.total += value
+            self._toppers.save(topper)
+            return
         if value:
             try:
                 draw = self._drawbox.get_open()
@@ -100,9 +104,9 @@ class Megaloop(IconScoreBase):
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)
             except Exception as e:
-                revert(f'Megaloop was unable to process your transaction. Error: {str(e)}')
+                revert(f'Unable to process your transaction: {str(e)}')
     
-    #######################################################################################
+    ###################################################################
     
     @external
     def open(self):
@@ -111,30 +115,40 @@ class Megaloop(IconScoreBase):
     @external
     def draw(self):
             try:
+                if not self._tickets:
+                    raise Exception('empty ticket list.')
+                
                 draw = self._drawbox.get_open()
-                # balance = self.icx.get_balance(self.address)
-                # balance >= draw.payout
-                if draw and self._tickets:
-                    ticket = draw.random(self, self._tickets)
-                    if ticket:    
-                        ##############################################
-                        config = Config(self._config.get())
-                        self._drawbox.close(config, self._instant)
-                        ##############################################
-                        address = ticket.address
-                        winner = self._winners.create()
-                        winner.address = address
-                        winner.payout = draw.payout
-                        winner.bh = self._instant.bh
-                        winner.name = self._players[address].name
-                        self._winners.save(winner)
-                        ##############################################
-                        self.icx.transfer(winner.address, draw.payout)
-                        ##############################################
-            except Exception as e:
-                revert(f'Failed to process drawing transaction. Error: {str(e)}')
+                if not draw:
+                    raise Exception('draw not yet opened.')
+                
+                ticket = draw.randomize(self, self._tickets)
+                if not ticket:
+                    raise Exception('win ticket not found.')
 
-    #######################################################################################
+                balance = self.icx.get_balance(self.address)
+                if balance < draw.payout:
+                    raise Exception('not enough ICX to send.')
+                
+                config = Config(self._config.get())
+                self._drawbox.close(config, self._instant)
+
+                winner = self._winners.create()
+                winner.payout = draw.payout
+                winner.bh = self._instant.bh
+                winner.address = ticket.address
+                winner.name = self._players[ticket.address].name
+                self._winners.save(winner)
+                
+                #############################################
+                address = Address.from_string(winner.address)
+                self.icx.transfer(address, draw.payout)
+                #############################################    
+
+            except Exception as e:
+                revert(f'Unable to draw winning ticket: {str(e)}')
+
+    ###################################################################
 
     @external(readonly=True)
     def name(self) -> str:
@@ -175,7 +189,7 @@ class Megaloop(IconScoreBase):
         return None if not topper else str(topper)
 
     @external(readonly=True)
-    def get_draws(self) -> str:
+    def get_draw_history(self) -> str:
         return [str(draw) for draw in self._drawbox]
 
     @external(readonly=True)
