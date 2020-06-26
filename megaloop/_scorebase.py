@@ -43,5 +43,7 @@ class ScoreBase(IconScoreBase):
         self._winners = Winners(db)
         self._toppers = Toppers(db)
         self._config = VarDB(CONFIG_VAR, db, str)
-        if self._lottery.draw:
+        if not self._lottery.draw:
+            self._tickets = Tickets(db, 0)
+        else:
             self._tickets = Tickets(db, self._lottery.draw.number)

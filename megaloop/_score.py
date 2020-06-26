@@ -79,10 +79,10 @@ class Score(Install, Migrate):
     def on_update(self):
         super().on_update()
 
-        self.draw()
+        self.next()
 
     @external
-    def draw(self):
+    def next(self):
         try:
             draw = self._lottery.draw
             balance = self.icx.get_balance(self.address)

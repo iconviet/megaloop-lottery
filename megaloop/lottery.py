@@ -83,6 +83,8 @@ class Lottery(JsonDictDB):
         self._draw = VarDB(DRAW_VAR, db, str)
         super().__init__(LOTTERY_DICT, db, Draw)
         self._config = VarDB(CONFIG_VAR, db, str)
-        if self.draw:
+        if not self.draw:
+            self._tickets = Tickets(db, 0)
+        else:
             self._tickets = Tickets(db, self.draw.number)
         
