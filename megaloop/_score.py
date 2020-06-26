@@ -96,17 +96,18 @@ class Score(Install, Migrate):
             if not draw:
                 raise Exception('draw not yet opened.')
             
-            ticket = draw.randomize(self, self._tickets)
-            if not ticket:
-                raise Exception('win ticket not found.')
-
             balance = self.icx.get_balance(self.address)
             if balance < draw.payout:
                 raise Exception('not enough ICX to send.')
             
+            ticket = draw.randomize(self._tickets, self._instant)
+            if not ticket:
+                raise Exception('randomized winning ticket not found.')
+
+            ###################################################################
             config = Config(self._config.get())
             self._drawbox.close(config, self._instant)
-
+            
             winner = self._winners.create()
             winner.payout = draw.payout
             winner.bh = self._instant.bh
@@ -114,10 +115,8 @@ class Score(Install, Migrate):
             winner.name = self._players[ticket.address].name
             self._winners.save(winner)
             
-            #############################################
-            address = Address.from_string(winner.address)
-            self.icx.transfer(address, draw.payout)
-            #############################################    
+            self.icx.transfer(Address.from_string(winner.address), draw.payout)
+            ###################################################################
 
         except Exception as e:
             revert(f'Unable to draw winning ticket: {str(e)}')

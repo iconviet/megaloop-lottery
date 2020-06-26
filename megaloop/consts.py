@@ -14,8 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-JSON_VERSION = 1
-
 CONFIG_JSON = 'config'
 DRAWBOX_DICT = 'drawbox'
 TICKETS_DICT = 'tickets'

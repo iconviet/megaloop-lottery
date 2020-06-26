@@ -44,7 +44,7 @@ class Draw(JsonBase):
     def payout(self) -> int:
         return self.prize * self.payout_ratio
 
-    def randomize(self, instant:Instant, tickets:Tickets) -> Ticket:
+    def randomize(self, tickets:Tickets, instant:Instant) -> Ticket:
         changes = [ticket.total / self.prize for ticket in tickets]
         random_factor = f'{str(instant.bh)}_{str(instant.tt)}_{str(self.prize)}_{str(len(tickets))}'
         remaining_distance = sum(changes) * int.from_bytes(sha3_256(random_factor.encode()), 'big') % 100000 / 100000.0

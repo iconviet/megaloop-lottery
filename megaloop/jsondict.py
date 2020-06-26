@@ -30,12 +30,12 @@ class JsonDictDB(IterableDictDB):
         for value in self.values():
             yield self._type(value)
     
-    def get_last(self) -> type:
-        if not self: return None
-        return self._type(self.get(-1))
-
+    
     def __setitem__(self, key, value):
         super().__setitem__(key, str(value))
+
+    def get_last(self) -> type:
+        return None if not self else self.get(-1)
 
     def __getitem__(self, key) -> type:
         json = super().__getitem__(key)
