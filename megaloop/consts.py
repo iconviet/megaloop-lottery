@@ -23,9 +23,3 @@ PLAYERS_DICT = 'players'
 WINNERS_DICT = 'winners'
 TOPPERS_DICT = 'toppers'
 OPEN_DRAW_JSON = 'open_draw'
-
-def to_loop(coin:int) -> int: return coin * 10**18
-
-def to_coin(loop:int) -> float: return loop / 10**18
-
-def to_percent(value:int) -> float: return value / 100
