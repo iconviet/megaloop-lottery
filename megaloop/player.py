@@ -23,7 +23,7 @@ class Player(JsonBase):
             # schema
             self.bh = 0
             self.total = 0
-            self.uname = None
+            self.name = None
             self.address = None
         else:
             super().__init__(json)

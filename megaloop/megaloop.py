@@ -63,13 +63,7 @@ class Megaloop(IconScoreBase):
     def on_update(self):
         super().on_update()
 
-        config = Config(self._config.get())
-        config.draw_topping = to_loop(10)
-        config.payout_ratio = to_percent(80)
-        self._config.set(str(config))
-        
-        self._drawbox.close(config, self._instant)
-        self._drawbox.open(config, self._instant)
+        self.draw()
 
     #######################################################################################
 
@@ -80,29 +74,29 @@ class Megaloop(IconScoreBase):
         if address in self._toppers: return
         if value:
             try:
-                open_draw = self._drawbox.get_open()
-                if open_draw:
+                draw = self._drawbox.get_open()
+                if draw:
+                    draw.total += value
+                    self._drawbox.set_open(draw)
                     ticket = self._tickets[address]
                     player = self._players[address]
-                    if not ticket:
-                        ticket = self._tickets.create()
-                        ticket.total = value
-                        ticket.address = str(address)
-                        ticket.bh = self.block_height
+                    if player:
+                        player.total += value
                     else:
-                        ticket.bh = self.block_height
-                        ticket.total = ticket.total + value
-                    if not player:
                         player =self._players.create()
                         player.total = value
+                        player.bh = self._instant.bh
                         player.address = str(address)
-                        player.bh = self.block_height
+                    if ticket:
+                        ticket.total += value
+                        ticket.bh = self._instant.bh
                     else:
-                        player.total = player.total + value
-                    self._tickets.save(ticket)
+                        ticket = self._tickets.create()
+                        ticket.total = value
+                        ticket.bh = self._instant.bh
+                        ticket.address = str(address)
                     self._players.save(player)
-                    # open_draw.prize = open_draw.prize + value
-                    self._drawbox.set_open(open_draw)
+                    self._tickets.save(ticket)
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)
             except Exception as e:
@@ -118,18 +112,25 @@ class Megaloop(IconScoreBase):
     def draw(self):
             try:
                 draw = self._drawbox.get_open()
-                if self.icx.get_balance(self.address) < draw.payout:
-                    raise Exception(f'{to_coin(draw.payout)} ICX is required.')
+                # balance = self.icx.get_balance(self.address)
+                # balance >= draw.payout
                 if draw and self._tickets:
                     ticket = draw.random(self, self._tickets)
                     if ticket:    
+                        ##############################################
+                        config = Config(self._config.get())
+                        self._drawbox.close(config, self._instant)
+                        ##############################################
+                        address = ticket.address
                         winner = self._winners.create()
-                        winner.total += draw.payout
-                        winner.bh = self.block_height
-                        winner.address = ticket.address
-                        self._winners.save(winner)                    
-                        self._drawbox.close(self._instant, self._config)
+                        winner.address = address
+                        winner.payout = draw.payout
+                        winner.bh = self._instant.bh
+                        winner.name = self._players[address].name
+                        self._winners.save(winner)
+                        ##############################################
                         self.icx.transfer(winner.address, draw.payout)
+                        ##############################################
             except Exception as e:
                 revert(f'Failed to process drawing transaction. Error: {str(e)}')
 
