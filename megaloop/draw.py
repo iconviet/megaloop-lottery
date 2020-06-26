@@ -35,6 +35,8 @@ class Draw(JsonBase):
             self.tx_closed = None
             self.tx_drawed = None
             self.payout_ratio = 0
+            self.winner_name = None
+            self.winner_address = None
     
     @property
     def prize(self) -> int:
@@ -44,11 +46,12 @@ class Draw(JsonBase):
     def payout(self) -> int:
         return self.prize * self.payout_ratio
 
-    def randomize(self, tickets:Tickets, instant:Instant) -> Ticket:
-        changes = [ticket.total / self.prize for ticket in tickets]
-        random_factor = f'{str(instant.bh)}_{str(instant.tt)}_{str(self.prize)}_{str(len(tickets))}'
-        remaining_distance = sum(changes) * int.from_bytes(sha3_256(random_factor.encode()), 'big') % 100000 / 100000.0
-        for i, w in enumerate(changes):
+    def randomize(self, tickets:Tickets, instant:Instant):
+        weights = [ticket.total / self.prize for ticket in tickets]
+        seed = f'{str(instant)}_{str(self.prize)}_{str(len(tickets))}'
+        random = (int.from_bytes(sha3_256(seed.encode()), 'big') % 100000) / 100000.0
+        remaining_distance = sum(weights) * random
+        for i, w in enumerate(weights):
             remaining_distance -= w
             if remaining_distance < 0:
                 return tickets.get(i)

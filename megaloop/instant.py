@@ -20,22 +20,21 @@ from iconservice import *
 class Instant(object):
      
    @property
-   def bh(self) -> int:
-      return self._bh
-
-   @property
    def tt(self) -> int:
       return self._tt
 
    @property
+   def bh(self) -> int:
+      return self._bh
+
+   @property
    def tx(self) -> str:
       return self._tx
-
+   
    def __repr__(self):
-      return f'{self.bh}_{self.tt}'
+      return f'{self.tt}_{self.bh}_{self.tx}'
 
    def __init__(self, icon:IconScoreBase):
       self._tt = icon.now()
       self._bh = icon.block_height
       self._tx = None if not icon.tx else f'0x{bytes.hex(icon.tx.hash)}'
-            

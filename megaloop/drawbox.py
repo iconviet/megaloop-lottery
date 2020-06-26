@@ -18,6 +18,7 @@
 from .draw import *
 from .consts import *
 from .config import *
+from .winner import *
 from .instant import *
 from .jsondict import *
 
@@ -52,11 +53,13 @@ class DrawBox(JsonDictDB):
             raise Exception('draw already opened')
         raise Exception('opened block required')
     
-    def close(self, config:Config, instant:Instant):
+    def close(self, winner: Winner, instant:Instant):
         if instant.bh:
             draw = self.get_open()
             if draw:
                 draw.bh_closed = instant.bh
+                draw.winner_name = winner.name
+                draw.winner_address = winner.address
                 if instant.tx: draw.tx_closed = instant.tx
                 self[draw.number] = draw
                 self._open_draw.remove()

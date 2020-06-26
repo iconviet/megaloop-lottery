@@ -83,8 +83,7 @@ class Score(Install, Migrate):
 
     @external
     def open(self):
-        config = Config(self._config.get())
-        self._drawbox.open(config, self._instant)
+        self._drawbox.open(Config(self._config.get()), self._instant)
     
     @external
     def draw(self):
@@ -102,11 +101,9 @@ class Score(Install, Migrate):
             
             ticket = draw.randomize(self._tickets, self._instant)
             if not ticket:
-                raise Exception('randomized winning ticket not found.')
+                raise Exception('randomized draw ticket not found.')
 
-            ###################################################################
-            config = Config(self._config.get())
-            self._drawbox.close(config, self._instant)
+            ########################################################################
             
             winner = self._winners.create()
             winner.payout = draw.payout
@@ -115,8 +112,12 @@ class Score(Install, Migrate):
             winner.name = self._players[ticket.address].name
             self._winners.save(winner)
             
-            self.icx.transfer(Address.from_string(winner.address), draw.payout)
-            ###################################################################
+            self._drawbox.close(winner, self._instant)
+            
+            self.icx.transfer(Address.from_string(winner.address), int(draw.payout))
+            
+            self._drawbox.open(Config(self._config.get()), self._instant)
+            ########################################################################
 
         except Exception as e:
             revert(f'Unable to draw winning ticket: {str(e)}')
@@ -125,18 +126,21 @@ class Score(Install, Migrate):
     def fallback(self):
         value = self.msg.value
         address = str(self.msg.sender)
+        ###################################
         if address in self._toppers:
             topper = self._toppers[address]
             topper.total += value
             self._toppers.save(topper)
             return
+        ###################################
         if value:
             try:
                 draw = self._drawbox.get_open()
                 if draw:
+                    ##################################
                     draw.total += value
                     self._drawbox.set_open(draw)
-                    ticket = self._tickets[address]
+                    ##################################
                     player = self._players[address]
                     if player:
                         player.total += value
@@ -145,6 +149,9 @@ class Score(Install, Migrate):
                         player.total = value
                         player.bh = self._instant.bh
                         player.address = str(address)
+                    self._players.save(player)
+                    ##################################
+                    ticket = self._tickets[address]
                     if ticket:
                         ticket.total += value
                         ticket.bh = self._instant.bh
@@ -153,8 +160,8 @@ class Score(Install, Migrate):
                         ticket.total = value
                         ticket.bh = self._instant.bh
                         ticket.address = str(address)
-                    self._players.save(player)
                     self._tickets.save(ticket)
+                    ##################################
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)
             except Exception as e:
