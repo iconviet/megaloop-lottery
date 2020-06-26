@@ -23,7 +23,6 @@ class Winner(JsonBase):
             # schema
             self.bh = 0
             self.payout = 0
-            self.name = None
             self.address = None
         else:
             super().__init__(json)

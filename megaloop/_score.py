@@ -26,37 +26,32 @@ class Score(Install, Migrate):
     
     @external(readonly=True)
     def get_open_draw(self) -> str:
-        draw = self._drawbox.get_open()
+        draw = self._lottery.draw
         return None if not draw else str(draw)
         
     @external(readonly=True)
     def get_last_draw(self) -> str:
-        draw = self._drawbox.get_last()
+        draw = self._lottery.last
         return None if not draw else str(draw)
 
     @external(readonly=True)
     def get_last_ticket(self) -> str:
-        ticket = self._tickets.get_last()
+        ticket = self._tickets.last
         return None if not ticket else str(ticket)
 
     @external(readonly=True)
     def get_last_player(self) -> str:
-        player = self._players.get_last()
+        player = self._players.last
         return None if not player else str(player)
     
     @external(readonly=True)
     def get_last_winner(self) -> str:
-        winner = self._winners.get_last()
+        winner = self._winners.last
         return None if not winner else str(winner)
 
     @external(readonly=True)
-    def get_last_topper(self) -> str:
-        topper = self._toppers.get_last()
-        return None if not topper else str(topper)
-
-    @external(readonly=True)
     def get_draw_history(self) -> str:
-        return [str(draw) for draw in self._drawbox]
+        return [str(draw) for draw in self._lottery]
 
     @external(readonly=True)
     def get_tickets(self) -> str:
@@ -74,6 +69,11 @@ class Score(Install, Migrate):
     def get_toppers(self) -> str:
         return [str(topper) for topper in self._toppers]
 
+    @external(readonly=True)
+    def get_ticket_history(self, draw_number:int) -> str:
+        tickets = Tickets(self._db, draw_number)
+        return [str(ticket) for ticket in tickets]
+
     ####################################################
 
     def on_update(self):
@@ -82,46 +82,18 @@ class Score(Install, Migrate):
         self.draw()
 
     @external
-    def open(self):
-        self._drawbox.open(Config(self._config.get()), self._instant)
-    
-    @external
     def draw(self):
         try:
-            if not self._tickets:
-                raise Exception('empty ticket list.')
-            
-            draw = self._drawbox.get_open()
-            if not draw:
-                raise Exception('draw not yet opened.')
-            
+            draw = self._lottery.draw
             balance = self.icx.get_balance(self.address)
             if balance < draw.payout:
-                raise Exception('not enough ICX to send.')
-            
-            ticket = draw.randomize(self._tickets, self._instant)
-            if not ticket:
-                raise Exception('randomized draw ticket not found.')
-
-            #####################################################################
-            
-            self._tickets.clear()
-
-            winner = self._winners.create()
-            address = ticket.address
-            winner.address = address
-            winner.payout = draw.payout
-            winner.bh = self._instant.bh
-            winner.name = self._players[address].name
-            self._winners.save(winner)
-            
-            self._drawbox.close(winner, self._instant)
-            
-            self.icx.transfer(Address.from_string(winner.address), winner.payout)
-            
-            self._drawbox.open(Config(self._config.get()), self._instant)
-            #####################################################################
-
+                raise Exception('not enough ICX balance.')
+            ##############################################
+            winner = self._lottery.pick(self._moment)
+            address = Address.from_string(winner.address)
+            self.icx.transfer(address, int(winner.payout))
+            self._lottery.open()
+            ##############################################
         except Exception as e:
             revert(f'Unable to draw winning ticket: {str(e)}')
 
@@ -138,11 +110,11 @@ class Score(Install, Migrate):
         ###################################
         if value:
             try:
-                draw = self._drawbox.get_open()
+                draw = self._lottery.draw
                 if draw:
                     ##################################
                     draw.total += value
-                    self._drawbox.set_open(draw)
+                    self._lottery.draw = draw
                     ##################################
                     player = self._players[address]
                     if player:
@@ -150,18 +122,18 @@ class Score(Install, Migrate):
                     else:
                         player =self._players.create()
                         player.total = value
-                        player.bh = self._instant.bh
+                        player.bh = self._moment.bh
                         player.address = str(address)
                     self._players.save(player)
                     ##################################
                     ticket = self._tickets[address]
                     if ticket:
                         ticket.total += value
-                        ticket.bh = self._instant.bh
+                        ticket.bh = self._moment.bh
                     else:
                         ticket = self._tickets.create()
                         ticket.total = value
-                        ticket.bh = self._instant.bh
+                        ticket.bh = self._moment.bh
                         ticket.address = str(address)
                     self._tickets.save(ticket)
                     ##################################

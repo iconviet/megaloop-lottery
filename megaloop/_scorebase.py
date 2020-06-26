@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .drawbox import *
+from .lottery import *
 from .players import *
 from .winners import *
 from .toppers import *
@@ -32,15 +32,16 @@ class ScoreBase(IconScoreBase):
         return 'MEGALOOP v2.0.0'
 
     @property
-    def _instant(self) -> Instant:
-        return Instant(self)
+    def _moment(self) -> Moment:
+        return Moment(self)
             
     def __init__(self, db: IconScoreDatabase):
+        self._db = db
         super().__init__(db)
-                
-        self._drawbox = DrawBox(db)
-        self._tickets = Tickets(db)
+        self._lottery = Lottery(db)
         self._players = Players(db)
         self._winners = Winners(db)
         self._toppers = Toppers(db)
-        self._config = VarDB(CONFIG_JSON, db, value_type=str)
+        self._config = VarDB(CONFIG_VAR, db, str)
+        if self._lottery.draw:
+            self._tickets = Tickets(db, self._lottery.draw.number)

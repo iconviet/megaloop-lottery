@@ -31,4 +31,4 @@ class Install(ScoreBase):
         config.payout_ratio = to_percent(100)
         self._config.set(str(config))
         
-        self._drawbox.open(config, self._instant)
+        self._lottery.open()

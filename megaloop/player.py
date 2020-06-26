@@ -22,8 +22,8 @@ class Player(JsonBase):
         if not json:
             # schema
             self.bh = 0
+            self.name = ''
             self.total = 0
-            self.name = None
             self.address = None
         else:
             super().__init__(json)

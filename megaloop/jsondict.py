@@ -34,7 +34,8 @@ class JsonDictDB(IterableDictDB):
     def __setitem__(self, key, value):
         super().__setitem__(key, str(value))
 
-    def get_last(self) -> type:
+    @property
+    def last(self) -> type:
         return None if not self else self.get(-1)
 
     def __getitem__(self, key) -> type:

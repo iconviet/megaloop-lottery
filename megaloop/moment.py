@@ -17,7 +17,7 @@
 # pylint: disable=W0614
 from iconservice import *
 
-class Instant(object):
+class Moment(object):
      
    @property
    def tt(self) -> int:

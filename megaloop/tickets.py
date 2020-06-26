@@ -24,5 +24,5 @@ class Tickets(JsonDictDB):
     def save(self, ticket:Ticket):
         self[ticket.address] = ticket
     
-    def __init__(self, db:IconScoreDatabase):
-        super().__init__(TICKETS_DICT, db, Ticket)
+    def __init__(self, db:IconScoreDatabase, draw_number):
+        super().__init__(f'draw_{draw_number}_{TICKETS_DICT}', db, Ticket)

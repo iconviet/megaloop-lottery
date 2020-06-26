@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CONFIG_JSON = 'config'
-DRAWBOX_DICT = 'drawbox'
+DRAW_VAR = 'draw'
+CONFIG_VAR = 'config'
+LOTTERY_DICT = 'lottery'
 TICKETS_DICT = 'tickets'
 PLAYERS_DICT = 'players'
 WINNERS_DICT = 'winners'
 TOPPERS_DICT = 'toppers'
-OPEN_DRAW_JSON = 'open_draw'
