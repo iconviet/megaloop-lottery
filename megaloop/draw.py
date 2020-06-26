@@ -44,7 +44,7 @@ class Draw(JsonBase):
     
     @property
     def payout(self) -> int:
-        return self.prize * self.payout_ratio
+        return int(self.prize * self.payout_ratio)
 
     def randomize(self, tickets:Tickets, instant:Instant):
         weights = [ticket.total / self.prize for ticket in tickets]

@@ -28,7 +28,7 @@ class Install(ScoreBase):
         
         config = Config(self._config.get())
         config.draw_topping = to_loop(5)
-        config.payout_ratio = to_percent(85)
+        config.payout_ratio = to_percent(100)
         self._config.set(str(config))
         
         self._drawbox.open(config, self._instant)

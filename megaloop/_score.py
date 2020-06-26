@@ -103,21 +103,24 @@ class Score(Install, Migrate):
             if not ticket:
                 raise Exception('randomized draw ticket not found.')
 
-            ########################################################################
+            #####################################################################
             
+            self._tickets.clear()
+
             winner = self._winners.create()
+            address = ticket.address
+            winner.address = address
             winner.payout = draw.payout
             winner.bh = self._instant.bh
-            winner.address = ticket.address
-            winner.name = self._players[ticket.address].name
+            winner.name = self._players[address].name
             self._winners.save(winner)
             
             self._drawbox.close(winner, self._instant)
             
-            self.icx.transfer(Address.from_string(winner.address), int(draw.payout))
+            self.icx.transfer(Address.from_string(winner.address), winner.payout)
             
             self._drawbox.open(Config(self._config.get()), self._instant)
-            ########################################################################
+            #####################################################################
 
         except Exception as e:
             revert(f'Unable to draw winning ticket: {str(e)}')
