@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .moment import *
+from .instant import *
 from .tickets import *
 from .jsonbase import *
 
@@ -42,9 +42,9 @@ class Draw(JsonBase):
     def payout(self) -> int:
         return int(self.prize * self.payout_ratio)
 
-    def random(self, moment:Moment, tickets:Tickets):
+    def random(self, instant:Instant, tickets:Tickets):
         weights = [ticket.total / self.prize for ticket in tickets]
-        seed = f'{str(moment)}_{str(self.prize)}_{str(len(tickets))}'
+        seed = f'{str(instant)}_{str(self.prize)}_{str(len(tickets))}'
         random = (int.from_bytes(sha3_256(seed.encode()), 'big') % 100000) / 100000.0
         remaining_distance = sum(weights) * random
         for i, w in enumerate(weights):

@@ -89,7 +89,7 @@ class Score(Install, Migrate):
             if balance < draw.payout:
                 raise Exception('not enough ICX balance.')
             ##############################################
-            winner = self._lottery.pick(self._moment)
+            winner = self._lottery.pick(self._instant)
             address = Address.from_string(winner.address)
             self.icx.transfer(address, int(winner.payout))
             self._lottery.open()
@@ -112,31 +112,31 @@ class Score(Install, Migrate):
             try:
                 draw = self._lottery.draw
                 if draw:
-                    ##################################
+                    ###################################
                     draw.total += value
                     self._lottery.draw = draw
-                    ##################################
+                    ###################################
                     player = self._players[address]
                     if player:
                         player.total += value
                     else:
-                        player =self._players.create()
+                        player = self._players.create()
                         player.total = value
-                        player.bh = self._moment.bh
+                        player.bh = self._instant.bh
                         player.address = str(address)
                     self._players.save(player)
-                    ##################################
+                    ###################################
                     ticket = self._tickets[address]
                     if ticket:
                         ticket.total += value
-                        ticket.bh = self._moment.bh
+                        ticket.bh = self._instant.bh
                     else:
                         ticket = self._tickets.create()
                         ticket.total = value
-                        ticket.bh = self._moment.bh
+                        ticket.bh = self._instant.bh
                         ticket.address = str(address)
                     self._tickets.save(ticket)
-                    ##################################
+                    ###################################
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)
             except Exception as e:

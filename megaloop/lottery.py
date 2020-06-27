@@ -18,7 +18,7 @@
 from .draw import *
 from .consts import *
 from .config import *
-from .moment import *
+from .instant import *
 from .winners import *
 from .jsondict import *
 class Lottery(JsonDictDB):
@@ -53,25 +53,25 @@ class Lottery(JsonDictDB):
             self._draw.set(str(draw))
             return draw
     
-    def pick(self, moment:Moment) -> Winner:
+    def pick(self, instant:Instant) -> Winner:
         if not self._tickets:
             raise Exception('empty ticket list.')
         draw = self.draw
         if not draw:
             raise Exception('draw not yet opened.')
-        ticket = draw.random(moment, self._tickets)
+        ticket = draw.random(instant, self._tickets)
         if not ticket:
             raise Exception('random ticket not found.')
         
         winner = self._winners.create()
-        winner.bh = moment.bh
+        winner.bh = instant.bh
         winner.payout = draw.payout
         winner.address = ticket.address
         self._winners.save(winner)
         
-        draw.bh = moment.bh
+        draw.bh = instant.bh
         draw.winner = winner.address
-        if moment.tx: draw.tx = moment.tx
+        if instant.tx: draw.tx = instant.tx
         self[draw.number] = draw
         self._draw.remove()
         
