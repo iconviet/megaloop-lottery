@@ -32,7 +32,8 @@ class Instant(object):
       return self._tx
    
    def __repr__(self):
-      return f'{self.tt}_{self.bh}_{self.tx}'
+      s = f'{self.tt}_{self._bh}'
+      return s if not self._tx else f'{s}_{self.tx}'
 
    def __init__(self, icon:IconScoreBase):
       self._tt = icon.now()
