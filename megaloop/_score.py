@@ -139,6 +139,7 @@ class Score(Install, Migrate):
                     else:
                         ticket = self._tickets.create()
                         ticket.value = value
+                        ticket.draw_number = draw.number
                         ticket.block = self._block.height
                         ticket.timestamp = self._block.timestamp
                         ticket.address = str(address)
