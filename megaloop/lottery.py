@@ -57,34 +57,6 @@ class Lottery(JsonDictDB):
             self._draw.set(str(draw))
             return draw
     
-    def pick(self, block:Block) -> Winner:
-        if not self._tickets:
-            raise Exception('empty ticket list.')
-        draw = self.draw
-        if not draw:
-            raise Exception('draw not yet opened.')
-        ticket = draw.random(block, self._tickets)
-        if not ticket:
-            raise Exception('random ticket not found.')
-        
-        winner = self._winners.create()
-        winner.block = block.height
-        winner.payout = draw.payout
-        winner.played = ticket.value
-        winner.address = ticket.address
-        winner.timestamp = block.timestamp
-        winner.chance = ticket.value / draw.prize
-        self._winners.save(winner)
-        
-        draw.block = block.height
-        draw.winner = winner.address
-        if block.txhash:
-            draw.txhash = block.txhash
-        self[draw.number] = draw
-        self._draw.remove()
-        
-        return winner
-
     def __init__(self, db:IconScoreDatabase):
         self._players = Winners(db)
         self._winners = Winners(db)
@@ -95,4 +67,33 @@ class Lottery(JsonDictDB):
             self._tickets = Tickets(db, 0)
         else:
             self._tickets = Tickets(db, self.draw.number)
-        
+
+    def pick(self, block:Block) -> Winner:
+        try:
+            if not self._tickets:
+                raise Exception('empty ticket list.')
+            draw = self.draw
+            if not draw:
+                raise Exception('draw not yet opened.')
+            ticket = draw.random(block, self._tickets)
+            if not ticket:
+                raise Exception('random ticket not found.')
+            
+            winner = self._winners.create()
+            winner.block = block.height
+            winner.payout = draw.payout
+            winner.played = ticket.value
+            winner.address = ticket.address
+            winner.timestamp = block.timestamp
+            winner.chance = ticket.value / draw.prize
+            self._winners.save(winner)
+            
+            draw.block = block.height
+            draw.winner = winner.address
+            if block.txhash: draw.txhash = block.txhash
+            self[draw.number] = draw
+            self._draw.remove()
+            
+            return winner
+        except Exception as e:
+            revert(f'Unable to pick winning ticket: {str(e)}')

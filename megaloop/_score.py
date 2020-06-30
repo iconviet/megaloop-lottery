@@ -83,7 +83,7 @@ class Score(Install, Migrate):
     def on_update(self):
         super().on_update()
 
-        # self.next()
+        self.next()
 
     @external
     def next(self):
@@ -92,12 +92,15 @@ class Score(Install, Migrate):
             balance = self.icx.get_balance(self.address)
             if balance < draw.payout:
                 raise Exception('not enough ICX balance.')
-            ##############################################
+            ##################################################
             winner = self._lottery.pick(self._block)
-            address = Address.from_string(winner.address)
-            self.icx.transfer(address, int(winner.payout))
-            self._lottery.open()
-            ##############################################
+            if winner:
+                address = Address.from_string(winner.address)
+                self.icx.transfer(address, int(winner.payout))
+                self._lottery.open()
+            else:
+                raise Exception('winner or ticket not found.')
+            ##################################################
         except Exception as e:
             revert(f'Unable to draw winning ticket: {str(e)}')
 
