@@ -19,4 +19,9 @@ from .jsonbase import *
 
 class Ranking(JsonBase):
     def __init__(self, json:str=None):
-        super().__init__(json)
+        if not json:
+            # schema
+            self.total = 0
+            self.address = None
+        else:
+            super().__init__(json)

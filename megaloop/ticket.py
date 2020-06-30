@@ -22,7 +22,7 @@ class Ticket(JsonBase):
         if not json:
             # schema
             self.bh = 0
-            self.total = 0
+            self.value = 0
             self.address = None
         else:
             super().__init__(json)

@@ -28,22 +28,22 @@ class Draw(JsonBase):
             # schema
             self.bh = 0
             self.tx = None
-            self.total = 0
-            self.number = 0
-            self.topping = 0
+            self.prize = 0
+            self.topup = 0
+            self.number = 0            
             self.winner = None
             self.payout_ratio = 0
     
     @property
-    def prize(self) -> int:
-        return self.total + self.topping
+    def total(self) -> int:
+        return self.prize + self.topup
     
     @property
     def payout(self) -> int:
-        return int(self.prize * self.payout_ratio)
+        return int(self.total * self.payout_ratio)
 
     def random(self, instant:Instant, tickets:Tickets):
-        weights = [ticket.total / self.prize for ticket in tickets]
+        weights = [ticket.value / self.prize for ticket in tickets]
         seed = f'{str(instant)}_{str(self.prize)}_{str(len(tickets))}'
         random = (int.from_bytes(sha3_256(seed.encode()), 'big') % 100000) / 100000.0
         remaining_distance = sum(weights) * random

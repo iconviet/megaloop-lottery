@@ -30,7 +30,7 @@ class Install(ScoreBase):
         self._sponsors.save(sponsor)
         
         config = Config(self._config.get())
-        config.draw_topping = to_loop(5)
+        config.prize_topup = to_loop(5)
         config.payout_ratio = to_percent(100)
         self._config.set(str(config))
         

@@ -117,7 +117,7 @@ class Score(Install, Migrate):
                 draw = self._lottery.draw
                 if draw:
                     ###################################
-                    draw.total += value
+                    draw.prize += value
                     self._lottery.draw = draw
                     ###################################
                     player = self._players[address]
@@ -132,11 +132,11 @@ class Score(Install, Migrate):
                     ###################################
                     ticket = self._tickets[address]
                     if ticket:
-                        ticket.total += value
+                        ticket.value += value
                         ticket.bh = self._instant.bh
                     else:
                         ticket = self._tickets.create()
-                        ticket.total = value
+                        ticket.value = value
                         ticket.bh = self._instant.bh
                         ticket.address = str(address)
                     self._tickets.save(ticket)
