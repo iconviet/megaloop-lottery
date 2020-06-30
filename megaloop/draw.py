@@ -37,7 +37,7 @@ class Draw(JsonBase):
     @property
     def total(self) -> int:
         return self.prize + self.topup
-    
+
     @property
     def payout(self) -> int:
         return int(self.total * self.payout_ratio)

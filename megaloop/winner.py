@@ -22,6 +22,8 @@ class Winner(JsonBase):
         if not json:
             # schema
             self.block = 0
+            self.played = 0
+            self.chance = 0
             self.payout = 0
             self.address = None
         else:

@@ -52,7 +52,7 @@ class Lottery(JsonDictDB):
             else:
                 draw.number = last.number + 1
             config = Config(self._config.get())
-            draw.topup = config.prize_topup
+            draw.topup = config.payout_topup
             draw.payout_ratio = config.payout_ratio
             self._draw.set(str(draw))
             return draw
@@ -69,8 +69,11 @@ class Lottery(JsonDictDB):
         
         winner = self._winners.create()
         winner.payout = draw.payout
+        winner.played = ticket.value
         winner.block = instant.block
         winner.address = ticket.address
+        winner.timestamp = instant.timestamp
+        winner.chance = ticket.value / draw.prize
         self._winners.save(winner)
         
         draw.block = instant.block

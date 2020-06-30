@@ -54,13 +54,13 @@ class Score(Install, Migrate):
         return None if not winner else str(winner)
 
     @external(readonly=True)
+    def get_draw_history(self) -> str:
+        return [str(draw) for draw in self._lottery]
+
+    @external(readonly=True)
     def get_ticket_history(self, number:int) -> str:
         tickets = Tickets(self._db, number)
         return [str(ticket) for ticket in tickets]
-
-    @external(readonly=True)
-    def get_draw_history(self) -> str:
-        return [str(draw) for draw in self._lottery]
 
     @external(readonly=True)
     def get_tickets(self) -> str:
@@ -83,7 +83,7 @@ class Score(Install, Migrate):
     def on_update(self):
         super().on_update()
 
-        self.next()
+        # self.next()
 
     @external
     def next(self):
@@ -105,42 +105,45 @@ class Score(Install, Migrate):
     def fallback(self):
         value = self.msg.value
         address = str(self.msg.sender)
-        ###################################
+        #####################################
         if address in self._sponsors:
             sponsor = self._sponsors[address]
-            sponsor.total += value
+            sponsor.total_topup += value
             self._sponsors.save(sponsor)
             return
-        ###################################
+        #####################################
         if value:
             try:
                 draw = self._lottery.draw
                 if draw:
-                    ######################################
+                    ##################################################
                     draw.prize += value
                     self._lottery.draw = draw
-                    ######################################
+                    ##############################################
                     player = self._players[address]
                     if player:
-                        player.total += value
+                        player.total_played += value
                     else:
                         player = self._players.create()
-                        player.total = value
+                        player.total_played = value
                         player.block = self._instant.block
+                        player.timestamp = self._instant.timestamp
                         player.address = str(address)
                     self._players.save(player)
-                    ######################################
+                    ##############################################
                     ticket = self._tickets[address]
                     if ticket:
                         ticket.value += value
                         ticket.block = self._instant.block
+                        ticket.timestamp = self._instant.timestamp
                     else:
                         ticket = self._tickets.create()
                         ticket.value = value
                         ticket.block = self._instant.block
+                        ticket.timestamp = self._instant.timestamp
                         ticket.address = str(address)
                     self._tickets.save(ticket)
-                    ######################################
+                    ##############################################
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)
             except Exception as e:

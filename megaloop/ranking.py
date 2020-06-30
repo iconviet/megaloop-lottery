@@ -21,7 +21,7 @@ class Ranking(JsonBase):
     def __init__(self, json:str=None):
         if not json:
             # schema
-            self.total = 0
             self.address = None
+            self.total_played = 0
         else:
             super().__init__(json)
