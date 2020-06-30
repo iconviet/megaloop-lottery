@@ -17,7 +17,7 @@
 # pylint: disable=W0614
 from .jsonbase import *
 
-class Topper(JsonBase):
+class Sponsor(JsonBase):
     def __init__(self, json:str=None):
         if not json:
             # schema

@@ -18,7 +18,7 @@
 from .lottery import *
 from .players import *
 from .winners import *
-from .toppers import *
+from .sponsors import *
 from iconservice import *
 
 def to_loop(icx:int) -> int: return icx * 10 ** 18
@@ -44,7 +44,7 @@ class ScoreBase(IconScoreBase):
         self._lottery = Lottery(db)
         self._players = Players(db)
         self._winners = Winners(db)
-        self._toppers = Toppers(db)
+        self._sponsors = Sponsors(db)
         self._config = VarDB(CONFIG_VAR, db, str)
         if not self._lottery.draw:
             self._tickets = Tickets(db, 0)

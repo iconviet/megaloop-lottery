@@ -25,9 +25,9 @@ class Install(ScoreBase):
     def on_install(self):
         super().on_install()
 
-        topper = self._toppers.create()
-        topper.address = str(self.owner)
-        self._toppers.save(topper)
+        sponsor = self._sponsors.create()
+        sponsor.address = str(self.owner)
+        self._sponsors.save(sponsor)
         
         config = Config(self._config.get())
         config.draw_topping = to_loop(5)

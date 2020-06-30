@@ -54,6 +54,11 @@ class Score(Install, Migrate):
         return None if not winner else str(winner)
 
     @external(readonly=True)
+    def get_ticket_history(self, number:int) -> str:
+        tickets = Tickets(self._db, number)
+        return [str(ticket) for ticket in tickets]
+
+    @external(readonly=True)
     def get_draw_history(self) -> str:
         return [str(draw) for draw in self._lottery]
 
@@ -70,15 +75,10 @@ class Score(Install, Migrate):
         return [str(winner) for winner in self._winners]
 
     @external(readonly=True)
-    def get_toppers(self) -> str:
-        return [str(topper) for topper in self._toppers]
-
-    @external(readonly=True)
-    def get_ticket_history(self, draw_number:int) -> str:
-        tickets = Tickets(self._db, draw_number)
-        return [str(ticket) for ticket in tickets]
-
-    ####################################################
+    def get_sponsors(self) -> str:
+        return [str(sponsor) for sponsor in self._sponsors]
+    
+    #######################################################
 
     def on_update(self):
         super().on_update()
@@ -106,10 +106,10 @@ class Score(Install, Migrate):
         value = self.msg.value
         address = str(self.msg.sender)
         ###################################
-        if address in self._toppers:
-            topper = self._toppers[address]
-            topper.total += value
-            self._toppers.save(topper)
+        if address in self._sponsors:
+            sponsor = self._sponsors[address]
+            sponsor.total += value
+            self._sponsors.save(sponsor)
             return
         ###################################
         if value:

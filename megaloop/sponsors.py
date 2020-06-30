@@ -16,13 +16,13 @@
 
 # pylint: disable=W0614
 from .consts import *
-from .topper import *
+from .sponsor import *
 from .jsondict import *
 
-class Toppers(JsonDictDB):
+class Sponsors(JsonDictDB):
     
-    def save(self, topper:Topper):
-        self[topper.address] = topper
+    def save(self, sponsor:Sponsor):
+        self[sponsor.address] = sponsor
 
     def __init__(self, db:IconScoreDatabase):
-        super().__init__(TOPPERS_DICT, db, Topper)
+        super().__init__(SPONSORS_DICT, db, Sponsor)
