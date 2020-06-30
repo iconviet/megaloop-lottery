@@ -32,6 +32,7 @@ class Draw(JsonBase):
             self.number = 0
             self.txhash = None
             self.winner = None
+            self.ticket_count = 0
             self.payout_ratio = 0
     
     @property

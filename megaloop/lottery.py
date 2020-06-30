@@ -84,12 +84,14 @@ class Lottery(JsonDictDB):
             winner.payout = draw.payout
             winner.played = ticket.value
             winner.address = ticket.address
+            winner.draw_number = draw.number
             winner.timestamp = block.timestamp
             winner.chance = ticket.value / draw.prize
             self._winners.save(winner)
             
             draw.block = block.height
             draw.winner = winner.address
+            draw.ticket_count = len(self._tickets)
             if block.txhash: draw.txhash = block.txhash
             self[draw.number] = draw
             self._draw.remove()

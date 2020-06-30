@@ -80,11 +80,6 @@ class Score(Install, Migrate):
     
     #######################################################
 
-    def on_update(self):
-        super().on_update()
-
-        self.next()
-
     @external
     def next(self):
         try:
@@ -120,9 +115,6 @@ class Score(Install, Migrate):
                 draw = self._lottery.draw
                 if draw:
                     ############################################
-                    draw.prize += value
-                    self._lottery.draw = draw
-                    ############################################
                     player = self._players[address]
                     if player:
                         player.total_played += value
@@ -147,6 +139,10 @@ class Score(Install, Migrate):
                         ticket.timestamp = self._block.timestamp
                         ticket.address = str(address)
                     self._tickets.save(ticket)
+                    ############################################
+                    draw.prize += value
+                    draw.ticket_count = len(self._tickets)
+                    self._lottery.draw = draw
                     ############################################
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)

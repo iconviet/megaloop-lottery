@@ -26,5 +26,6 @@ class Winner(JsonBase):
             self.chance = 0
             self.payout = 0
             self.address = None
+            self.draw_number = 0
         else:
             super().__init__(json)

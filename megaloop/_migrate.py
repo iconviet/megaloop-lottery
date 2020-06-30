@@ -18,7 +18,7 @@
 from ._scorebase import *
 
 """
-Subsequence SCORE migration/maintainance
+SCORE migration/maintainance
 """
 class Migrate(ScoreBase):
     
