@@ -20,10 +20,10 @@ from .jsonbase import *
 class Player(JsonBase):
     def __init__(self, json:str=None):
         if not json:
-            # schema
-            self.bh = 0
+            # schema            
             self.name = ''
             self.total = 0
+            self.block = 0
             self.address = None
         else:
             super().__init__(json)

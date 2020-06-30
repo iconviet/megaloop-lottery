@@ -25,12 +25,12 @@ class Draw(JsonBase):
         if json:
             super().__init__(json)
         else:
-            # schema
-            self.bh = 0
-            self.tx = None
+            # schema                        
             self.prize = 0
             self.topup = 0
-            self.number = 0            
+            self.block = 0
+            self.number = 0
+            self.txhash = None
             self.winner = None
             self.payout_ratio = 0
     

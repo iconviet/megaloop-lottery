@@ -68,14 +68,15 @@ class Lottery(JsonDictDB):
             raise Exception('random ticket not found.')
         
         winner = self._winners.create()
-        winner.bh = instant.bh
         winner.payout = draw.payout
+        winner.block = instant.block
         winner.address = ticket.address
         self._winners.save(winner)
         
-        draw.bh = instant.bh
+        draw.block = instant.block
         draw.winner = winner.address
-        if instant.tx: draw.tx = instant.tx
+        if instant.txhash:
+            draw.txhash = instant.txhash
         self[draw.number] = draw
         self._draw.remove()
         

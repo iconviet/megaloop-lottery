@@ -23,22 +23,22 @@ Point in time snapshot/representation
 class Instant(object):
      
    @property
-   def tt(self) -> int:
-      return self._tt
+   def now(self) -> int:
+      return self._now
 
    @property
-   def bh(self) -> int:
-      return self._bh
+   def block(self) -> int:
+      return self._block
 
    @property
-   def tx(self) -> str:
-      return self._tx
+   def txhash(self) -> str:
+      return self._txhash
    
    def __repr__(self):
-      s = f'{self.tt}_{self._bh}'
-      return s if not self._tx else f'{s}_{self.tx}'
+      s = f'{self.now}_{self._block}'
+      return s if not self._txhash else f'{s}_{self.txhash}'
 
    def __init__(self, icon:IconScoreBase):
-      self._tt = icon.now()
-      self._bh = icon.block_height
-      self._tx = None if not icon.tx else f'0x{bytes.hex(icon.tx.hash)}'
+      self._now = icon.now()
+      self._block = icon.block_height
+      self._txhash = None if not icon.tx else f'0x{bytes.hex(icon.tx.hash)}'

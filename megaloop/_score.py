@@ -116,31 +116,31 @@ class Score(Install, Migrate):
             try:
                 draw = self._lottery.draw
                 if draw:
-                    ###################################
+                    ######################################
                     draw.prize += value
                     self._lottery.draw = draw
-                    ###################################
+                    ######################################
                     player = self._players[address]
                     if player:
                         player.total += value
                     else:
                         player = self._players.create()
                         player.total = value
-                        player.bh = self._instant.bh
+                        player.block = self._instant.block
                         player.address = str(address)
                     self._players.save(player)
-                    ###################################
+                    ######################################
                     ticket = self._tickets[address]
                     if ticket:
                         ticket.value += value
-                        ticket.bh = self._instant.bh
+                        ticket.block = self._instant.block
                     else:
                         ticket = self._tickets.create()
                         ticket.value = value
-                        ticket.bh = self._instant.bh
+                        ticket.block = self._instant.block
                         ticket.address = str(address)
                     self._tickets.save(ticket)
-                    ###################################
+                    ######################################
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)
             except Exception as e:
