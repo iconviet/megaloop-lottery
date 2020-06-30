@@ -30,9 +30,9 @@ class Draw(JsonBase):
             self.tx = None
             self.total = 0
             self.number = 0
-            self.topping = 0     
-            self.winner = None       
-            self.payout_ratio = 0            
+            self.topping = 0
+            self.winner = None
+            self.payout_ratio = 0
     
     @property
     def prize(self) -> int:

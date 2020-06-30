@@ -17,6 +17,9 @@
 # pylint: disable=W0614
 from ._scorebase import *
 
+"""
+Wiring for first SCORE deployment
+"""
 class Install(ScoreBase):
     
     def on_install(self):

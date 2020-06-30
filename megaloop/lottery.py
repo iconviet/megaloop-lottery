@@ -21,6 +21,10 @@ from .config import *
 from .instant import *
 from .winners import *
 from .jsondict import *
+
+"""
+Lottery logic and management
+"""
 class Lottery(JsonDictDB):
     
     @property

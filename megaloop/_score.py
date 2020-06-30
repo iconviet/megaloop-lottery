@@ -18,6 +18,10 @@
 from ._install import *
 from ._migrate import *
 
+"""
+Megaloop main SCORE composite
+    * TODO: huge kludge - to refactor later
+"""
 class Score(Install, Migrate):
 
     @external(readonly=True)

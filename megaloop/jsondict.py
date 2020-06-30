@@ -19,6 +19,9 @@ from .jsonbase import *
 from iconservice import *
 from .scorelib.iterable_dict import *
 
+"""
+Base class for JSON object management
+"""
 class JsonDictDB(IterableDictDB):
     
     def create(self) -> type:
@@ -48,4 +51,3 @@ class JsonDictDB(IterableDictDB):
     def __init__(self, key: str, db: IconScoreDatabase, type:type):
         self._type = type
         super().__init__(key, db, str, True)
-    

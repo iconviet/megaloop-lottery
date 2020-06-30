@@ -17,6 +17,9 @@
 # pylint: disable=W0614
 from .jsonbase import *
 
+"""
+Global configuration class
+"""
 class Config(JsonBase):
     
     def __init__(self, json:str=None):

@@ -17,6 +17,9 @@
 # pylint: disable=W0614
 from ._scorebase import *
 
+"""
+Subsequence SCORE migration/maintainance
+"""
 class Migrate(ScoreBase):
     
     def on_update(self):

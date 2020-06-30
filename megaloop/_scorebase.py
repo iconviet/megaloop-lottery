@@ -25,6 +25,9 @@ def to_loop(icx:int) -> int: return icx * 10 ** 18
 def to_icx(loop:int) -> float: return loop / 10 ** 18
 def to_percent(value:int) -> float: return value / 100
 
+"""
+Base class for main SCORE
+"""
 class ScoreBase(IconScoreBase):
     
     @external(readonly=True)

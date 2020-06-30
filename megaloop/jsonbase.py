@@ -17,6 +17,9 @@
 # pylint: disable=W0614
 from iconservice import *
 
+"""
+Base class for JSON serialization/deserialization
+"""
 class JsonBase(object):
     def __repr__(self):
         return json_dumps(self.__dict__)

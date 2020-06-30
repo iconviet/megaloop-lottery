@@ -17,6 +17,9 @@
 # pylint: disable=W0614
 from iconservice import *
 
+"""
+Point in time snapshot/representation
+"""
 class Instant(object):
      
    @property
