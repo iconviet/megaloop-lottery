@@ -18,13 +18,13 @@
 from iconservice import *
 
 """
-Point in time snapshot/representation
+Block at a point in time
 """
-class Instant(object):
+class Block(object):
      
    @property
-   def block(self) -> int:
-      return self._block
+   def height(self) -> int:
+      return self._height
 
    @property
    def txhash(self) -> str:
@@ -36,11 +36,11 @@ class Instant(object):
    
    def __repr__(self):
       if not self.txhash:
-         return f'{self._block}_{self.timestamp}'
+         return f'{self.height}_{self.timestamp}'
       else:
-         return f'{self._block}_{self.txhash}_{self.timestamp}'
+         return f'{self.height}_{self.txhash}_{self.timestamp}'
 
    def __init__(self, icon:IconScoreBase):
       self._timestamp = icon.now()
-      self._block = icon.block_height
+      self._height = icon.block_height
       self._txhash = None if not icon.tx else f'0x{bytes.hex(icon.tx.hash)}'

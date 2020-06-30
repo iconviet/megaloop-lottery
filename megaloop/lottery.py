@@ -16,9 +16,9 @@
 
 # pylint: disable=W0614
 from .draw import *
+from .block import *
 from .consts import *
 from .config import *
-from .instant import *
 from .winners import *
 from .jsondict import *
 
@@ -57,29 +57,29 @@ class Lottery(JsonDictDB):
             self._draw.set(str(draw))
             return draw
     
-    def pick(self, instant:Instant) -> Winner:
+    def pick(self, block:Block) -> Winner:
         if not self._tickets:
             raise Exception('empty ticket list.')
         draw = self.draw
         if not draw:
             raise Exception('draw not yet opened.')
-        ticket = draw.random(instant, self._tickets)
+        ticket = draw.random(block, self._tickets)
         if not ticket:
             raise Exception('random ticket not found.')
         
         winner = self._winners.create()
+        winner.block = block.height
         winner.payout = draw.payout
         winner.played = ticket.value
-        winner.block = instant.block
         winner.address = ticket.address
-        winner.timestamp = instant.timestamp
+        winner.timestamp = block.timestamp
         winner.chance = ticket.value / draw.prize
         self._winners.save(winner)
         
-        draw.block = instant.block
+        draw.block = block.height
         draw.winner = winner.address
-        if instant.txhash:
-            draw.txhash = instant.txhash
+        if block.txhash:
+            draw.txhash = block.txhash
         self[draw.number] = draw
         self._draw.remove()
         

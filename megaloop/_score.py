@@ -93,7 +93,7 @@ class Score(Install, Migrate):
             if balance < draw.payout:
                 raise Exception('not enough ICX balance.')
             ##############################################
-            winner = self._lottery.pick(self._instant)
+            winner = self._lottery.pick(self._block)
             address = Address.from_string(winner.address)
             self.icx.transfer(address, int(winner.payout))
             self._lottery.open()
@@ -116,34 +116,34 @@ class Score(Install, Migrate):
             try:
                 draw = self._lottery.draw
                 if draw:
-                    ##################################################
+                    ############################################
                     draw.prize += value
                     self._lottery.draw = draw
-                    ##############################################
+                    ############################################
                     player = self._players[address]
                     if player:
                         player.total_played += value
                     else:
                         player = self._players.create()
                         player.total_played = value
-                        player.block = self._instant.block
-                        player.timestamp = self._instant.timestamp
+                        player.block = self._block.height
+                        player.timestamp = self._block.timestamp
                         player.address = str(address)
                     self._players.save(player)
-                    ##############################################
+                    ############################################
                     ticket = self._tickets[address]
                     if ticket:
                         ticket.value += value
-                        ticket.block = self._instant.block
-                        ticket.timestamp = self._instant.timestamp
+                        ticket.block = self._block.height
+                        ticket.timestamp = self._block.timestamp
                     else:
                         ticket = self._tickets.create()
                         ticket.value = value
-                        ticket.block = self._instant.block
-                        ticket.timestamp = self._instant.timestamp
+                        ticket.block = self._block.height
+                        ticket.timestamp = self._block.timestamp
                         ticket.address = str(address)
                     self._tickets.save(ticket)
-                    ##############################################
+                    ############################################
                 else:
                     self.icx.transfer(self.msg.sender, self.msg.value)
             except Exception as e:

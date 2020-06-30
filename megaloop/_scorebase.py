@@ -35,8 +35,8 @@ class ScoreBase(IconScoreBase):
         return 'MEGALOOP v2.0.0'
 
     @property
-    def _instant(self) -> Instant:
-        return Instant(self)
+    def _block(self) -> Block:
+        return Block(self)
             
     def __init__(self, db: IconScoreDatabase):
         self._db = db
