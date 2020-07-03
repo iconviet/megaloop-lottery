@@ -15,23 +15,12 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from ._scorebase import *
+from .megaloopbase import *
 
 """
-Wiring for first SCORE deployment
+SCORE migration/maintainance
 """
-class Install(ScoreBase):
+class Migrate(MegaloopBase):
     
-    def on_install(self):
-        super().on_install()
-
-        sponsor = self._sponsors.create()
-        sponsor.address = str(self.owner)
-        self._sponsors.save(sponsor)
-        
-        config = Config(self._config.get())
-        config.payout_topup = to_loop(5)
-        config.payout_ratio = to_percent(100)
-        self._config.set(str(config))
-        
-        self._lottery.open()
+    def on_update(self):
+        super().on_update()

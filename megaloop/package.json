@@ -1,5 +1,5 @@
 {
     "version": "1.0.0",
-    "main_score": "Score",
-    "main_module": "_score"    
+    "main_score": "Megaloop",
+    "main_module": "megaloop"    
 }

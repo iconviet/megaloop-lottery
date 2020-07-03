@@ -15,14 +15,14 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from ._install import *
-from ._migrate import *
+from .megaloop_install import *
+from .megaloop_migrate import *
 
 """
 Megaloop main SCORE composite
     * TODO: huge kludge - to refactor later
 """
-class Score(Install, Migrate):
+class Megaloop(Install, Migrate):
 
     @external(readonly=True)
     def get_config(self) -> str:

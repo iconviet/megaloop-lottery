@@ -28,7 +28,7 @@ def to_percent(value:int) -> float: return value / 100
 """
 Base class for main SCORE
 """
-class ScoreBase(IconScoreBase):
+class MegaloopBase(IconScoreBase):
     
     @external(readonly=True)
     def name(self) -> str:
