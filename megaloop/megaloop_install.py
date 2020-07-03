@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .megaloopbase import *
+from .megaloop_base import *
 
 """
 Wiring for first SCORE deployment
