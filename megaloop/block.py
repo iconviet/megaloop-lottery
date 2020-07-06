@@ -38,7 +38,7 @@ class Block(object):
       if not self.txhash:
          return f'{self.height}_{self.timestamp}'
       else:
-         return f'{self.height}_{self.txhash}_{self.timestamp}'
+         return f'{self.height}_{self.timestamp}_{self.txhash}'
 
    def __init__(self, icon:IconScoreBase):
       self._timestamp = icon.now()

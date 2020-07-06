@@ -24,14 +24,14 @@ class Install(MegaloopBase):
     
     def on_install(self):
         super().on_install()
-
-        sponsor = self._sponsors.new()
-        sponsor.address = str(self.owner)
-        self._sponsors.save(sponsor)
-        
+       
         config = Config(self._config.get())
         config.payout_topup = to_loop(5)
         config.payout_ratio = to_percent(100)
         self._config.set(str(config))
+
+        sponsor = self._sponsors.new()
+        sponsor.address = str(self.owner)
+        self._sponsors[sponsor.address] = sponsor
         
-        self._lottery.open()
+        self._lottery.open(self._block)

@@ -54,13 +54,17 @@ class Megaloop(Install, Migrate):
         return None if not winner else str(winner)
 
     @external(readonly=True)
-    def get_draw_history(self) -> str:
+    def get_past_draws(self) -> str:
         return [str(draw) for draw in self._lottery]
 
     @external(readonly=True)
-    def get_ticket_history(self, number:int) -> str:
-        tickets = Tickets(self._db, number)
+    def get_past_tickets(self, draw_number:int) -> str:
+        tickets = Tickets(self._db, draw_number)
         return [str(ticket) for ticket in tickets]
+
+    @external(readonly=True)
+    def get_past_winners(self) -> str:
+        return [str(winner) for winner in self._winners]
 
     @external(readonly=True)
     def get_tickets(self) -> str:
@@ -69,11 +73,7 @@ class Megaloop(Install, Migrate):
     @external(readonly=True)
     def get_players(self) -> str:
         return [str(player) for player in self._players]
-
-    @external(readonly=True)
-    def get_winners(self) -> str:
-        return [str(winner) for winner in self._winners]
-
+    
     @external(readonly=True)
     def get_sponsors(self) -> str:
         return [str(sponsor) for sponsor in self._sponsors]
@@ -92,7 +92,7 @@ class Megaloop(Install, Migrate):
             if winner:
                 address = Address.from_string(winner.address)
                 self.icx.transfer(address, int(winner.payout))
-                self._lottery.open()
+                self._lottery.open(self._block)
             else:
                 raise Exception('winner or ticket not found.')
             ##################################################
@@ -107,7 +107,7 @@ class Megaloop(Install, Migrate):
         if address in self._sponsors:
             sponsor = self._sponsors[address]
             sponsor.total_topup += value
-            self._sponsors.save(sponsor)
+            self._sponsors[address] = sponsor
             return
         #####################################
         if value:
@@ -121,24 +121,21 @@ class Megaloop(Install, Migrate):
                     else:
                         player = self._players.new()
                         player.total_played = value
-                        player.block = self._block.height
                         player.timestamp = self._block.timestamp
                         player.address = str(address)
-                    self._players.save(player)
+                    self._players[address] = player
                     ############################################
                     ticket = self._tickets[address]
                     if ticket:
                         ticket.value += value
-                        ticket.block = self._block.height
                         ticket.timestamp = self._block.timestamp
                     else:
                         ticket = self._tickets.new()
                         ticket.value = value
                         ticket.draw_number = draw.number
-                        ticket.block = self._block.height
                         ticket.timestamp = self._block.timestamp
                         ticket.address = str(address)
-                    self._tickets.save(ticket)
+                    self._tickets[address] = ticket
                     ############################################
                     draw.prize += value
                     draw.ticket_count = len(self._tickets)

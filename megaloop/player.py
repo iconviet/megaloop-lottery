@@ -22,7 +22,7 @@ class Player(JsonBase):
         if not json:
             # schema            
             self.name = ''
-            self.block = 0
+            self.timestamp = 0
             self.address = None
             self.total_played = 0
         else:

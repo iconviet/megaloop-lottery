@@ -21,8 +21,5 @@ from .jsondict import *
 
 class Players(JsonDictDB):
     
-    def save(self, player:Player):
-        self[player.address] = player
-
     def __init__(self, db:IconScoreDatabase):
         super().__init__(PLAYERS_DICT, db, Player)

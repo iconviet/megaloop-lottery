@@ -21,11 +21,11 @@ class Winner(JsonBase):
     def __init__(self, json:str=None):
         if not json:
             # schema
-            self.block = 0
             self.played = 0
             self.chance = 0
             self.payout = 0
             self.address = None
+            self.timestamp = 0
             self.draw_number = 0
         else:
             super().__init__(json)

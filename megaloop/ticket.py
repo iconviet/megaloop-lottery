@@ -22,9 +22,9 @@ class Ticket(JsonBase):
         if not json:
             # schema
             self.value = 0
-            self.block = 0
             self.timestamp = 0
             self.address = None
+            self.last_block = 0
             self.draw_number = 0
         else:
             super().__init__(json)

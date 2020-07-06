@@ -42,7 +42,7 @@ class Lottery(JsonDictDB):
             return
         raise Exception('draw number mismatch')
 
-    def open(self):
+    def open(self, block:Block):
         draw = Draw()
         last = self.last
         if not last:
@@ -51,6 +51,7 @@ class Lottery(JsonDictDB):
             draw.number = last.number + 1
         config = Config(self._config.get())
         draw.topup = config.payout_topup
+        draw.opened_block = block.height
         draw.payout_ratio = config.payout_ratio
         self._draw.set(str(draw))
         return draw
@@ -78,17 +79,16 @@ class Lottery(JsonDictDB):
                 raise Exception('random ticket not found.')
             
             winner = self._winners.new()
-            winner.block = block.height
             winner.payout = draw.payout
             winner.played = ticket.value
             winner.address = ticket.address
             winner.draw_number = draw.number
             winner.timestamp = block.timestamp
             winner.chance = ticket.value / draw.prize
-            self._winners.save(winner)
+            self._winners[draw.number] = winner
             
-            draw.block = block.height
             draw.winner = winner.address
+            draw.drawed_block = block.height
             draw.ticket_count = len(self._tickets)
             if block.txhash: draw.txhash = block.txhash
             self[draw.number] = draw
