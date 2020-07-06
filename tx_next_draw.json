@@ -1,0 +1,13 @@
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "icx_sendTransaction",
+    "params": {
+        "dataType": "call",
+        "data": {
+            "method": "next_draw"
+        },
+        "stepLimit": "0x2540be400",
+        "to": "cxbe4d47bc817a54cdbcf921e9cd8f9e11175645ab"
+    }
+}

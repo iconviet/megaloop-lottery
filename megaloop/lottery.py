@@ -43,19 +43,17 @@ class Lottery(JsonDictDB):
         raise Exception('draw number mismatch')
 
     def open(self):
-        draw = self.draw
-        if not draw:
-            draw = Draw()
-            last = self.last
-            if not last:
-                draw.number = 1
-            else:
-                draw.number = last.number + 1
-            config = Config(self._config.get())
-            draw.topup = config.payout_topup
-            draw.payout_ratio = config.payout_ratio
-            self._draw.set(str(draw))
-            return draw
+        draw = Draw()
+        last = self.last
+        if not last:
+            draw.number = 1
+        else:
+            draw.number = last.number + 1
+        config = Config(self._config.get())
+        draw.topup = config.payout_topup
+        draw.payout_ratio = config.payout_ratio
+        self._draw.set(str(draw))
+        return draw
     
     def __init__(self, db:IconScoreDatabase):
         self._players = Winners(db)
@@ -70,11 +68,11 @@ class Lottery(JsonDictDB):
 
     def pick(self, block:Block) -> Winner:
         try:
-            if not self._tickets:
-                raise Exception('empty ticket list.')
             draw = self.draw
             if not draw:
-                raise Exception('draw not yet opened.')
+                raise Exception('draw not opened.')
+            if not self._tickets:
+                raise Exception('empty ticket list.')
             ticket = draw.random(block, self._tickets)
             if not ticket:
                 raise Exception('random ticket not found.')
@@ -94,7 +92,6 @@ class Lottery(JsonDictDB):
             draw.ticket_count = len(self._tickets)
             if block.txhash: draw.txhash = block.txhash
             self[draw.number] = draw
-            self._draw.remove()
             
             return winner
         except Exception as e:

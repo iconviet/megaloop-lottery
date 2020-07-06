@@ -81,7 +81,7 @@ class Megaloop(Install, Migrate):
     #######################################################
 
     @external
-    def next(self):
+    def next_draw(self):
         try:
             draw = self._lottery.draw
             balance = self.icx.get_balance(self.address)
