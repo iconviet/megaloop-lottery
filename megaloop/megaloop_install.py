@@ -25,7 +25,7 @@ class Install(MegaloopBase):
     def on_install(self):
         super().on_install()
 
-        sponsor = self._sponsors.create()
+        sponsor = self._sponsors.new()
         sponsor.address = str(self.owner)
         self._sponsors.save(sponsor)
         

@@ -20,7 +20,7 @@ from .megaloop_migrate import *
 
 """
 Megaloop main SCORE composite
-    * TODO: huge kludge - to refactor later
+    * TODO: still kludgy - refactor later
 """
 class Megaloop(Install, Migrate):
 
@@ -119,7 +119,7 @@ class Megaloop(Install, Migrate):
                     if player:
                         player.total_played += value
                     else:
-                        player = self._players.create()
+                        player = self._players.new()
                         player.total_played = value
                         player.block = self._block.height
                         player.timestamp = self._block.timestamp
@@ -132,7 +132,7 @@ class Megaloop(Install, Migrate):
                         ticket.block = self._block.height
                         ticket.timestamp = self._block.timestamp
                     else:
-                        ticket = self._tickets.create()
+                        ticket = self._tickets.new()
                         ticket.value = value
                         ticket.draw_number = draw.number
                         ticket.block = self._block.height

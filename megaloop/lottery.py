@@ -23,7 +23,7 @@ from .winners import *
 from .jsondict import *
 
 """
-Lottery logic and management
+Lottery logic and state management
 """
 class Lottery(JsonDictDB):
     
@@ -77,7 +77,7 @@ class Lottery(JsonDictDB):
             if not ticket:
                 raise Exception('random ticket not found.')
             
-            winner = self._winners.create()
+            winner = self._winners.new()
             winner.block = block.height
             winner.payout = draw.payout
             winner.played = ticket.value

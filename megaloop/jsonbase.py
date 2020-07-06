@@ -18,7 +18,7 @@
 from iconservice import *
 
 """
-Base class for JSON serialization/deserialization
+Base class for JSON object
 """
 class JsonBase(object):
     def __repr__(self):

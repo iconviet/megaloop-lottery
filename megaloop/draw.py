@@ -44,12 +44,11 @@ class Draw(JsonBase):
         return int(self.total * self.payout_ratio)
 
     def random(self, block:Block, tickets:Tickets):
-        weights = [ticket.value / self.prize for ticket in tickets]
+        chances = [ticket.value / self.prize for ticket in tickets]
         seed = f'{str(block)}_{str(self.prize)}_{str(len(tickets))}'
         random = (int.from_bytes(sha3_256(seed.encode()), 'big') % 100000) / 100000.0
-        remaining_distance = sum(weights) * random
-        for i, w in enumerate(weights):
-            remaining_distance -= w
-            if remaining_distance < 0:
-                return tickets.get(i)
+        factor = sum(chances) * random
+        for index, chance in enumerate(chances):
+            factor -= chance
+            if factor < 0: return tickets.get(index)
         return None

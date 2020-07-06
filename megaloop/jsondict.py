@@ -20,11 +20,11 @@ from iconservice import *
 from .scorelib.iterable_dict import *
 
 """
-Base class for JSON object management
+Base class for JSON object collection
 """
 class JsonDictDB(IterableDictDB):
     
-    def create(self) -> type:
+    def new(self) -> type:
         instance = self._type()
         instance.version = 1
         return instance
