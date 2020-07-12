@@ -27,12 +27,12 @@ class Megaloop(Install, Migrate):
     @external(readonly=True)
     def get_config(self) -> str:
         return self._config.get()
-    
+
     @external(readonly=True)
     def get_open_draw(self) -> str:
         draw = self._lottery.draw
         return None if not draw else str(draw)
-        
+
     @external(readonly=True)
     def get_last_draw(self) -> str:
         draw = self._lottery.last
@@ -41,7 +41,11 @@ class Megaloop(Install, Migrate):
     @external(readonly=True)
     def get_last_ticket(self) -> str:
         ticket = self._tickets.last
-        return None if not ticket else str(ticket)
+        if not ticket:
+            return None
+        draw = self._lottery.draw
+        ticket.chance = ticket.value / draw.prize
+        return str(ticket)
 
     @external(readonly=True)
     def get_last_player(self) -> str:
@@ -54,31 +58,36 @@ class Megaloop(Install, Migrate):
         return None if not winner else str(winner)
 
     @external(readonly=True)
-    def get_past_draws(self) -> str:
-        return [str(draw) for draw in self._lottery]
-
-    @external(readonly=True)
-    def get_past_tickets(self, draw_number:int) -> str:
-        tickets = Tickets(self._db, draw_number)
-        return [str(ticket) for ticket in tickets]
-
-    @external(readonly=True)
-    def get_past_winners(self) -> str:
-        return [str(winner) for winner in self._winners]
-
-    @external(readonly=True)
-    def get_tickets(self) -> str:
-        return [str(ticket) for ticket in self._tickets]
-
-    @external(readonly=True)
-    def get_players(self) -> str:
+    def get_players(self, skip:int=0, take:int=0) -> str:
         return [str(player) for player in self._players]
     
     @external(readonly=True)
-    def get_sponsors(self) -> str:
+    def get_tickets(self, skip:int=0, take:int=0) -> str:
+        tickets = []
+        draw = self._lottery.draw
+        for ticket in self._tickets:
+            ticket.chance = ticket.value / draw.prize
+            tickets.append(str(ticket))
+        return tickets
+    
+    @external(readonly=True)
+    def get_sponsors(self, skip:int=0, take:int=0) -> str:
         return [str(sponsor) for sponsor in self._sponsors]
     
-    #######################################################
+    @external(readonly=True)
+    def get_past_draws(self, skip:int=0, take:int=0) -> str:
+        return [str(draw) for draw in self._lottery]
+
+    @external(readonly=True)
+    def get_past_winners(self, skip:int=0, take:int=0) -> str:
+        return [str(winner) for winner in self._winners]
+
+    @external(readonly=True)
+    def get_past_tickets(self, draw_number:int, skip:int=0, take:int=0) -> str:
+        tickets = Tickets(self._db, draw_number)
+        return [str(ticket) for ticket in tickets]
+    
+    ###########################################################################
 
     @external
     def next_draw(self):
@@ -115,29 +124,29 @@ class Megaloop(Install, Migrate):
                 draw = self._lottery.draw
                 if draw:
                     ############################################
+                    draw.prize += value
+                    ############################################
                     player = self._players[address]
                     if player:
                         player.total_played += value
                     else:
                         player = self._players.new()
                         player.total_played = value
-                        player.timestamp = self._block.timestamp
                         player.address = str(address)
+                    player.timestamp = self._block.timestamp
                     self._players[address] = player
                     ############################################
                     ticket = self._tickets[address]
                     if ticket:
                         ticket.value += value
-                        ticket.timestamp = self._block.timestamp
                     else:
                         ticket = self._tickets.new()
                         ticket.value = value
-                        ticket.draw_number = draw.number
-                        ticket.timestamp = self._block.timestamp
                         ticket.address = str(address)
+                        ticket.draw_number = draw.number
+                    ticket.timestamp = self._block.timestamp
                     self._tickets[address] = ticket
                     ############################################
-                    draw.prize += value
                     draw.ticket_count = len(self._tickets)
                     self._lottery.draw = draw
                     ############################################
