@@ -19,6 +19,7 @@ from .draw import *
 from .block import *
 from .consts import *
 from .config import *
+from .players import *
 from .winners import *
 from .jsondict import *
 
@@ -57,7 +58,7 @@ class Lottery(JsonDictDB):
         return draw
     
     def __init__(self, db:IconScoreDatabase):
-        self._players = Winners(db)
+        self._players = Players(db)
         self._winners = Winners(db)
         self._draw = VarDB(DRAW_VAR, db, str)
         super().__init__(LOTTERY_DICT, db, Draw)
@@ -86,6 +87,11 @@ class Lottery(JsonDictDB):
             winner.timestamp = block.timestamp
             winner.chance = ticket.value / draw.prize
             self._winners[draw.number] = winner
+
+            player = self._players[winner.address]
+            if player:
+                player.total_payout += winner.payout
+                self._players[player.address] = player
             
             draw.winner = winner.address
             draw.drawed_block = block.height

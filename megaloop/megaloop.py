@@ -62,15 +62,6 @@ class Megaloop(Install, Migrate):
         return [str(player) for player in self._players]
     
     @external(readonly=True)
-    def get_tickets(self, skip:int=0, take:int=0) -> str:
-        tickets = []
-        draw = self._lottery.draw
-        for ticket in self._tickets:
-            ticket.chance = ticket.value / draw.prize
-            tickets.append(str(ticket))
-        return tickets
-    
-    @external(readonly=True)
     def get_sponsors(self, skip:int=0, take:int=0) -> str:
         return [str(sponsor) for sponsor in self._sponsors]
     
@@ -82,6 +73,13 @@ class Megaloop(Install, Migrate):
     def get_past_winners(self, skip:int=0, take:int=0) -> str:
         return [str(winner) for winner in self._winners]
 
+    @external(readonly=True)
+    def get_tickets(self, skip:int=0, take:int=0) -> str:
+        def calculate_chance(ticket:Ticket):
+            ticket.chance = ticket.value / self._lottery.draw.prize
+            return ticket
+        return [str(calculate_chance(ticket)) for ticket in self._tickets]
+    
     @external(readonly=True)
     def get_past_tickets(self, draw_number:int, skip:int=0, take:int=0) -> str:
         tickets = Tickets(self._db, draw_number)
@@ -145,6 +143,8 @@ class Megaloop(Install, Migrate):
                         ticket.address = str(address)
                         ticket.draw_number = draw.number
                     ticket.timestamp = self._block.timestamp
+                    if address in self._tickets:
+                        del self._tickets[address]
                     self._tickets[address] = ticket
                     ############################################
                     draw.ticket_count = len(self._tickets)

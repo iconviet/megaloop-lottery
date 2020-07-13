@@ -25,5 +25,6 @@ class Player(JsonBase):
             self.timestamp = 0
             self.address = None
             self.total_played = 0
+            self.total_payout = 0
         else:
             super().__init__(json)
