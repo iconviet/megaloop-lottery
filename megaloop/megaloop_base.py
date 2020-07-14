@@ -39,14 +39,17 @@ class MegaloopBase(IconScoreBase):
         return Block(self)
             
     def __init__(self, db: IconScoreDatabase):
-        self._db = db
         super().__init__(db)
+        
+        self._db = db
         self._lottery = Lottery(db)
         self._players = Players(db)
         self._winners = Winners(db)
         self._sponsors = Sponsors(db)
         self._config = VarDB(CONFIG_VAR, db, str)
-        if not self._lottery.draw:
+        
+        open_draw = self._lottery.open_draw
+        if not open_draw:
             self._tickets = Tickets(db, 0)
         else:
-            self._tickets = Tickets(db, self._lottery.draw.number)
+            self._tickets = Tickets(db, open_draw.number)

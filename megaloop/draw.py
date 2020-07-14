@@ -29,12 +29,13 @@ class Draw(JsonBase):
             self.prize = 0
             self.topup = 0
             self.number = 0
+            self.timestamp = 0
             self.txhash = None
             self.winner = None
             self.ticket_count = 0
             self.payout_ratio = 0
             self.opened_block = 0
-            self.drawed_block = None
+            self.picked_block = 0
     
     @property
     def total(self) -> int:
