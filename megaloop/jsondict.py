@@ -20,7 +20,7 @@ from iconservice import *
 from .scorelib.iterable_dict import *
 
 """
-Base class for JSON object collection
+Base class for JSON object dictionary
 """
 class JsonDictDB(IterableDictDB):
     

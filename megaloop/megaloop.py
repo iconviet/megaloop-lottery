@@ -119,22 +119,21 @@ class Megaloop(Install, Migrate):
                     raise Exception('winner or ticket not found.')
                 ##################################################
         except Exception as e:
-            revert(f'Unable to draw winning ticket: {str(e)}')
+            revert(f'Unable to proceed to the next draw:{str(e)}')
 
     @payable
     def fallback(self):
-        value = self.msg.value
-        address = str(self.msg.sender)
-        #####################################
-        if address in self._sponsors:
-            sponsor = self._sponsors[address]
-            sponsor.total_topup += value
-            self._sponsors[address] = sponsor
-            return
-        #####################################
-        if value:
-            try:
-                open_draw = self._lottery.open_draw
+        try:
+            value = self.msg.value
+            address = str(self.msg.sender)
+            open_draw = self._lottery.open_draw
+            if value:
+                ###########################################
+                if address in self._sponsors:
+                    sponsor = self._sponsors[address]
+                    sponsor.total_topup += value
+                    self._sponsors[address] = sponsor
+                    return
                 ###########################################
                 player = self._players[address]
                 if player:
@@ -162,5 +161,6 @@ class Megaloop(Install, Migrate):
                 open_draw.prize += value
                 open_draw.ticket_count = len(self._tickets)
                 self._lottery.open_draw = open_draw
-            except Exception as e:
-                revert(f'Unable to process your transaction: {str(e)}')
+                ###########################################
+        except Exception as e:
+            revert(f'Transaction failed because: {str(e)}')

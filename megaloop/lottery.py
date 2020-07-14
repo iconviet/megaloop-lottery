@@ -87,6 +87,6 @@ class Lottery(JsonDictDB):
         open_draw.timestamp = block.timestamp
         open_draw.opened_block = block.height
         open_draw.payout_ratio = config.draw_payout_ratio
-        open_draw.number = 1 if not last_draw else last_draw.number + 1
+        open_draw.number = 1000 if not last_draw else last_draw.number + 1
         self._open_draw.set(str(open_draw))
         return open_draw
