@@ -24,7 +24,8 @@ class Config(JsonBase):
     
     def __init__(self, json:str=None):
         if not json:
-            self.payout_topup = 0
-            self.payout_ratio = 0
+            self.draw_topup = 0
+            self.draw_interval = 0
+            self.draw_payout_ratio = 0
         else:
             super().__init__(json)

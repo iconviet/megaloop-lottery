@@ -26,8 +26,9 @@ class Install(MegaloopBase):
         super().on_install()
        
         config = Config(self._config.get())
-        config.payout_topup = to_loop(5)
-        config.payout_ratio = to_percent(100)
+        config.draw_interval = 43200
+        config.draw_topup = to_loop(5)
+        config.draw_payout_ratio = to_percent(100)
         self._config.set(str(config))
 
         sponsor = self._sponsors.new()

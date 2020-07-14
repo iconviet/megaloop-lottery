@@ -47,9 +47,5 @@ class MegaloopBase(IconScoreBase):
         self._winners = Winners(db)
         self._sponsors = Sponsors(db)
         self._config = VarDB(CONFIG_VAR, db, str)
-        
-        open_draw = self._lottery.open_draw
-        if not open_draw:
-            self._tickets = Tickets(db, 0)
-        else:
-            self._tickets = Tickets(db, open_draw.number)
+        self._tickets = Tickets(db, self._lottery.open_draw.number)
+            

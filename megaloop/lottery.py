@@ -30,13 +30,11 @@ class Lottery(JsonDictDB):
     
     @property
     def open_draw(self) -> Draw:
-        json = self._open_draw.get()
-        return None if not json else Draw(json)
+        return Draw(self._open_draw.get())
     
     @open_draw.setter
     def open_draw(self, open_draw:Draw):
-        if open_draw:
-            self._open_draw.set(str(open_draw))
+        self._open_draw.set(str(open_draw))
 
     def __init__(self, db:IconScoreDatabase):
         super().__init__(LOTTERY_DICT, db, Draw)
@@ -46,16 +44,11 @@ class Lottery(JsonDictDB):
         self._config = VarDB(CONFIG_VAR, db, str)
         self._open_draw = VarDB(OPEN_DRAW_VAR, db, str)
         
-        if not self.open_draw:
-            self._tickets = Tickets(db, 0)
-        else:
-            self._tickets = Tickets(db, self.open_draw.number)
+        self._tickets = Tickets(db, self.open_draw.number)
 
     def pick(self, block:Block) -> Winner:
         try:
             open_draw = self.open_draw
-            if not open_draw:
-                raise Exception('draw not opened.')
             if not self._tickets:
                 raise Exception('empty ticket list.')
             ticket = open_draw.random(block, self._tickets)
@@ -81,7 +74,6 @@ class Lottery(JsonDictDB):
             open_draw.ticket_count = len(self._tickets)
             if block.txhash: open_draw.txhash = block.txhash
             self[open_draw.number] = open_draw
-            self._open_draw.remove()
 
             return winner
         except Exception as e:
@@ -91,10 +83,10 @@ class Lottery(JsonDictDB):
         open_draw = Draw()
         last_draw = self.last
         config = Config(self._config.get())
-        open_draw.topup = config.payout_topup
+        open_draw.topup = config.draw_topup
         open_draw.timestamp = block.timestamp
         open_draw.opened_block = block.height
-        open_draw.payout_ratio = config.payout_ratio
+        open_draw.payout_ratio = config.draw_payout_ratio
         open_draw.number = 1 if not last_draw else last_draw.number + 1
         self._open_draw.set(str(open_draw))
         return open_draw
