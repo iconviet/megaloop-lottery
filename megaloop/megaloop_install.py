@@ -15,23 +15,22 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .megaloop_base import *
+from .megaloop_core import *
 
 """
 Wiring for first SCORE deployment
 """
-class Install(MegaloopBase):
+class MegaloopInstall(MegaloopCore):
     
     def on_install(self):
         super().on_install()
-       
-        config = Config(self._config.get())
-        config.draw_interval = 150
-        config.draw_payout_ratio = to_percent(100)
-        self._config.set(str(config))
-
-        sponsor = self._sponsors.new()
+        db = self.__db
+        draw_conf = self._draw_conf
+        draw_conf.promo = 0
+        draw_conf.interval = 43200
+        draw_conf.payout_ratio = to_percent(100)
+        draw_conf.save_to(db)
+        self.init_open_draw()
+        sponsor = self._sponsors.create()
         sponsor.address = str(self.owner)
         self._sponsors[sponsor.address] = sponsor
-        
-        self._lottery.open(self._block)

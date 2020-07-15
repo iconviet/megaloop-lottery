@@ -17,9 +17,12 @@
 # pylint: disable=W0614
 from .consts import *
 from .ticket import *
-from .jsondict import *
+from .json_dict import *
 
 class Tickets(JsonDictDB):
     
-    def __init__(self, db:IconScoreDatabase, number:int):
-        super().__init__(f'draw_{number}_{TICKETS_DICT}', db, Ticket)
+    def __init__(self, db:IconScoreDatabase):
+        super().__init__(TICKETS_DICT, db, Ticket)
+
+    def save(self, ticket:Ticket):
+        self[ticket.draw_number][ticket.address] = ticket

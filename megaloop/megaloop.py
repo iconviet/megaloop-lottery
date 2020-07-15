@@ -22,38 +22,42 @@ from .megaloop_migrate import *
 Megaloop main SCORE composite
     * TODO: still kludgy - refactor later
 """
-class Megaloop(Install, Migrate):
+class Megaloop(MegaloopInstall, MegaloopMigrate):
 
     @external(readonly=True)
-    def get_config(self) -> str:
-        return self._config.get()
+    def name(self) -> str:
+        return 'MEGALOOP v2.0.0'
+
+    @external(readonly=True)
+    def get_draw_conf(self) -> str:
+        return str(self._draw_conf)
     
     @external(readonly=True)
     def get_open_draw(self) -> str:
-        return str(self._lottery.open_draw)
+        return str(self._open_draw)
 
     @external(readonly=True)
     def get_last_player(self) -> str:
-        player = self._players.last
+        player = self._players.get_last()
         return None if not player else str(player)
     
     @external(readonly=True)
     def get_last_winner(self) -> str:
-        winner = self._winners.last
+        winner = self._winners.get_last()
         return None if not winner else str(winner)
 
     @external(readonly=True)
     def get_last_ticket(self) -> str:
-        ticket = self._tickets.last
+        ticket = self._tickets.get_last()
         if not ticket:
             return None
-        open_draw = self._lottery.open_draw
+        open_draw = self._open_draw
         ticket.chance = ticket.value / open_draw.prize
         return str(ticket)
 
     @external(readonly=True)
     def get_last_draw(self) -> str:
-        last_draw = self._lottery.last
+        last_draw = self._draws.get_last()
         return None if not last_draw else str(last_draw)
 
     @external(readonly=True)
@@ -66,7 +70,7 @@ class Megaloop(Install, Migrate):
     
     @external(readonly=True)
     def get_past_draws(self, skip:int=0, take:int=0) -> str:
-        return [str(draw) for draw in self._lottery]
+        return [str(draw) for draw in self._draws]
 
     @external(readonly=True)
     def get_past_winners(self, skip:int=0, take:int=0) -> str:
@@ -74,7 +78,7 @@ class Megaloop(Install, Migrate):
 
     @external(readonly=True)
     def get_tickets(self, skip:int=0, take:int=0) -> str:
-        open_draw = self._lottery.open_draw
+        open_draw = self._open_draw
         def calculate_chance(ticket:Ticket):
             ticket.chance = ticket.value / open_draw.prize
             return ticket
@@ -82,22 +86,23 @@ class Megaloop(Install, Migrate):
     
     @external(readonly=True)
     def get_past_tickets(self, draw_number:int, skip:int=0, take:int=0) -> str:
-        tickets = Tickets(self._db, draw_number)
-        return [str(ticket) for ticket in tickets]
+        return [str(ticket) for ticket in self._tickets[draw_number]]
     
     ###########################################################################
 
     @payable
     def fallback(self):
         try:
+            db = self.__db
+            instant = self.__it
             value = self.msg.value
+            open_draw = self._open_draw
             address = str(self.msg.sender)
-            open_draw = self._lottery.open_draw
             if value:
                 ###########################################
                 if address in self._sponsors:
                     sponsor = self._sponsors[address]
-                    sponsor.total_topup += value
+                    sponsor.total_promo += value
                     self._sponsors[address] = sponsor
                     return
                 ###########################################
@@ -105,41 +110,35 @@ class Megaloop(Install, Migrate):
                 if player:
                     player.total_played += value
                 else:
-                    player = self._players.new()
+                    player = self._players.create()
                     player.total_played = value
                     player.address = str(address)
-                player.timestamp = self._block.timestamp
+                player.timestamp = instant.timestamp
                 self._players[address] = player
                 ###########################################
                 ticket = self._tickets[address]
                 if ticket:
                     ticket.value += value
                 else:
-                    ticket = self._tickets.new()
+                    ticket = self._tickets.create()
                     ticket.value = value
                     ticket.address = str(address)
                     ticket.draw_number = open_draw.number
-                ticket.timestamp = self._block.timestamp
+                ticket.timestamp = instant.timestamp
                 if address in self._tickets:
                     del self._tickets[address]
                 self._tickets[address] = ticket
                 ###########################################
                 open_draw.prize += value
                 open_draw.ticket_count = len(self._tickets)
-                self._lottery.open_draw = open_draw
+                self._open_draw.save_to(db)
                 ###########################################
         except Exception as e:
             revert(f'Transaction failed because: {str(e)}')
 
     @external
-    def set_config(self, json:str):
-        if json:
-            self._config.set(json)
-            config = Config(self._config.get())
-            open_draw = self._lottery.open_draw
-            open_draw.topup = config.draw_topup
-            open_draw.payout_ratio = config.draw_payout_ratio
-            self._lottery.open_draw = open_draw
+    def set_draw_conf(self, json:str):
+        pass            
 
     @external
     def withdraw(self, address:Address, value:int):
@@ -155,22 +154,25 @@ class Megaloop(Install, Migrate):
     @external
     def next_draw(self):
         try:
-            open_draw = self._lottery.open_draw
+            db = self.__db
+            instant = self.__it
+            open_draw = self._open_draw
             if not self._tickets:
-                open_draw.timestamp = self._block.timestamp
-                open_draw.opened_block = self._block.height
-                self._lottery.open_draw = open_draw
+                open_draw.opened_block = instant.block
+                open_draw.timestamp = instant.timestamp
+                open_draw.save_to(db)
             else:
                 #################################################
                 balance = self.icx.get_balance(self.address)
                 if balance < open_draw.payout:
                     raise Exception('not enough ICX balance')
                 #################################################
-                winner = self._lottery.pick(self._block)
+                winner = self.pick_winner()
                 if winner:
+                    self.save_winner(winner)
                     address = Address.from_string(winner.address)
-                    self.icx.transfer(address, int(winner.payout))
-                    self._lottery.open(self._block)
+                    self.icx.transfer(address,int(winner.payout))
+                    self.init_open_draw()
                 else:
                     raise Exception('winner or ticket not found')
                 #################################################

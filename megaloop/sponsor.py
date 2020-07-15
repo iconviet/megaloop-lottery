@@ -15,13 +15,11 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .jsonbase import *
+from .json_base import *
 
 class Sponsor(JsonBase):
+
     def __init__(self, json:str=None):
-        if not json:
-            # schema
-            self.address = None
-            self.total_topup = 0
-        else:
-            super().__init__(json)
+        self.address = None
+        self.total_promo = 0
+        super().__init__(json)

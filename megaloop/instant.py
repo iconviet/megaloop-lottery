@@ -18,11 +18,29 @@
 from iconservice import *
 
 """
-Base class for JSON object
+Instant information
 """
-class JsonBase(object):
-    def __repr__(self):
-        return json_dumps(self.__dict__)
+class Instant(object):
+     
+   @property
+   def block(self) -> int:
+      return self._block
 
-    def __init__(self, json:str=None):
-        if json: self.__dict__ = json_loads(json)
+   @property
+   def txhash(self) -> str:
+      return self._txhash
+
+   @property
+   def timestamp(self) -> int:
+      return self._timestamp
+   
+   def __repr__(self):
+      if not self.txhash:
+         return f'{self.block}_{self.timestamp}'
+      else:
+         return f'{self.block}_{self.timestamp}_{self.txhash}'
+
+   def __init__(self, base:IconScoreBase):
+      self._timestamp = base.now()
+      self._block = base.block_height
+      self._txhash = None if not base.tx else f'0x{bytes.hex(base.tx.hash)}'

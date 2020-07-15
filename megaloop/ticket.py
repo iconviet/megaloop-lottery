@@ -15,16 +15,14 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .jsonbase import *
+from .json_base import *
 
 class Ticket(JsonBase):
+
     def __init__(self, json:str=None):
-        if not json:
-            # schema
-            self.value = 0
-            self.timestamp = 0
-            self.address = None
-            self.last_block = 0
-            self.draw_number = 0
-        else:
-            super().__init__(json)
+        self.value = 0
+        self.timestamp = 0
+        self.address = None
+        self.last_block = 0
+        self.draw_number = 0
+        super().__init__(json)

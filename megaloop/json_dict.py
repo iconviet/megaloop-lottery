@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .jsonbase import *
+from .json_base import *
 from iconservice import *
 from .scorelib.iterable_dict import *
 
@@ -24,7 +24,7 @@ Base class for JSON object dictionary
 """
 class JsonDictDB(IterableDictDB):
     
-    def new(self) -> type:
+    def create(self) -> type:
         instance = self._type()
         instance.version = 1
         return instance
@@ -37,8 +37,7 @@ class JsonDictDB(IterableDictDB):
     def __setitem__(self, key, value):
         super().__setitem__(key, str(value))
 
-    @property
-    def last(self) -> type:
+    def get_last(self) -> type:
         return None if not self else self.get(-1)
 
     def __getitem__(self, key) -> type:

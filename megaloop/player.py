@@ -15,16 +15,14 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .jsonbase import *
+from .json_base import *
 
 class Player(JsonBase):
+
     def __init__(self, json:str=None):
-        if not json:
-            # schema            
-            self.name = ''
-            self.timestamp = 0
-            self.address = None
-            self.total_played = 0
-            self.total_payout = 0
-        else:
-            super().__init__(json)
+        self.name = ''
+        self.timestamp = 0
+        self.address = None
+        self.total_played = 0
+        self.total_payout = 0
+        super().__init__(json)

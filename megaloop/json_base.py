@@ -16,31 +16,16 @@
 
 # pylint: disable=W0614
 from iconservice import *
-
 """
-Block at a point in time
+Base class for JSON object
 """
-class Block(object):
-     
-   @property
-   def height(self) -> int:
-      return self._height
+class JsonBase(object):
+    
+    def __init__(self, json:str=None):
+        if json: self.load(json)
 
-   @property
-   def txhash(self) -> str:
-      return self._txhash
+    def __repr__(self):
+        return json_dumps(self.__dict__)
 
-   @property
-   def timestamp(self) -> int:
-      return self._timestamp
-   
-   def __repr__(self):
-      if not self.txhash:
-         return f'{self.height}_{self.timestamp}'
-      else:
-         return f'{self.height}_{self.timestamp}_{self.txhash}'
-
-   def __init__(self, icon:IconScoreBase):
-      self._timestamp = icon.now()
-      self._height = icon.block_height
-      self._txhash = None if not icon.tx else f'0x{bytes.hex(icon.tx.hash)}'
+    def load(self, json:str):
+        self.__dict__ = json_loads(json)

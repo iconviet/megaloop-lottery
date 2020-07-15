@@ -15,14 +15,17 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .json_base import *
 
-class Winner(JsonBase):
-    def __init__(self, json:str=None):
-        self.played = 0
-        self.chance = 0
-        self.payout = 0
-        self.timestamp = 0
-        self.address = None
-        self.draw_number = 0
-        super().__init__(json)
+from .draw import *
+from .consts import *
+from .json_dict import *
+
+class Draws(JsonDictDB):
+    
+    def save(self, draw:Draw):
+        self[draw.number] = draw
+
+    def __init__(self, db:IconScoreDatabase):
+        super().__init__(DRAWS_DICT, db, Draw)
+
+    

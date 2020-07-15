@@ -15,17 +15,19 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .jsonbase import *
+from .consts import *
+from .json_base import *
 
 """
-Global configuration class
+Draw configuration class
 """
-class Config(JsonBase):
+class DrawConf(JsonBase):
     
-    def __init__(self, json:str=None):
-        if not json:
-            self.draw_topup = 0
-            self.draw_interval = 0
-            self.draw_payout_ratio = 0
-        else:
-            super().__init__(json)
+    def save_to(self, db:IconScoreDatabase):
+        VarDB(DRAW_CONF_VAR, db, str).set(str(self))
+
+    def __init__(self, db:IconScoreDatabase):
+        self.promo = 0
+        self.interval = 0
+        self.payout_ratio = 0    
+        super().__init__(VarDB(DRAW_CONF_VAR, db, str).get())

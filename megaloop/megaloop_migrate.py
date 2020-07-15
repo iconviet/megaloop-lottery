@@ -15,12 +15,12 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .megaloop_base import *
+from .megaloop_core import *
 
 """
 SCORE migration/maintainance
 """
-class Migrate(MegaloopBase):
+class MegaloopMigrate(MegaloopCore):
     
     def on_update(self):
         super().on_update()

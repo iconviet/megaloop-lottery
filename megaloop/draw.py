@@ -15,42 +15,28 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .block import *
-from .tickets import *
-from .jsonbase import *
+from .json_base import *
 
 class Draw(JsonBase):
     
     def __init__(self, json:str=None):
-        if json:
-            super().__init__(json)
-        else:
-            # schema                        
-            self.prize = 0
-            self.topup = 0
-            self.number = 0
-            self.timestamp = 0
-            self.txhash = None
-            self.winner = None
-            self.ticket_count = 0
-            self.payout_ratio = 0
-            self.opened_block = 0
-            self.picked_block = 0
+        self.prize = 0
+        self.promo = 0
+        self.number = 0
+        self.interval = 0
+        self.txhash = None
+        self.winner = None
+        self.timestamp = 0
+        self.ticket_count = 0
+        self.payout_ratio = 0
+        self.opened_block = 0
+        self.picked_block = 0
+        super().__init__(json)
     
     @property
     def total(self) -> int:
-        return self.prize + self.topup
+        return self.prize + self.promo
 
     @property
     def payout(self) -> int:
         return int(self.total * self.payout_ratio)
-
-    def random(self, block:Block, tickets:Tickets):
-        chances = [ticket.value / self.prize for ticket in tickets]
-        seed = f'{str(block)}_{str(self.prize)}_{str(len(tickets))}'
-        random = (int.from_bytes(sha3_256(seed.encode()), 'big') % 100000) / 100000.0
-        factor = sum(chances) * random
-        for index, chance in enumerate(chances):
-            factor -= chance
-            if factor < 0: return tickets.get(index)
-        return None

@@ -14,10 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CONFIG_VAR = 'config'
-LOTTERY_DICT = 'lottery'
+DRAWS_DICT = 'draws'
 TICKETS_DICT = 'tickets'
 PLAYERS_DICT = 'players'
 WINNERS_DICT = 'winners'
 SPONSORS_DICT = 'sponsors'
+
+DRAW_CONF_VAR = 'draw_conf'
 OPEN_DRAW_VAR = 'open_draw'

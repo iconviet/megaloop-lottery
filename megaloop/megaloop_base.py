@@ -15,10 +15,14 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .lottery import *
+from .draws import *
+from .instant import *
+from .tickets import *
 from .players import *
 from .winners import *
 from .sponsors import *
+from .draw_conf import *
+from .open_draw import *
 from iconservice import *
 
 def to_loop(icx:int) -> int: return icx * 10 ** 18
@@ -30,22 +34,16 @@ Base class for main SCORE
 """
 class MegaloopBase(IconScoreBase):
     
-    @external(readonly=True)
-    def name(self) -> str:
-        return 'MEGALOOP v2.0.0'
-
     @property
-    def _block(self) -> Block:
-        return Block(self)
+    def __it(self) -> Instant:
+        return Instant(self)
             
     def __init__(self, db: IconScoreDatabase):
         super().__init__(db)
-        
-        self._db = db
-        self._lottery = Lottery(db)
+        self._draws = Draws(db)
+        self._tickets = Tickets(db)
         self._players = Players(db)
         self._winners = Winners(db)
         self._sponsors = Sponsors(db)
-        self._config = VarDB(CONFIG_VAR, db, str)
-        self._tickets = Tickets(db, self._lottery.open_draw.number)
-            
+        self._draw_conf = DrawConf(db)
+        self._open_draw = OpenDraw(db)
