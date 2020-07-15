@@ -26,8 +26,7 @@ class Install(MegaloopBase):
         super().on_install()
        
         config = Config(self._config.get())
-        config.draw_interval = 43200
-        config.draw_topup = to_loop(5)
+        config.draw_interval = 150
         config.draw_payout_ratio = to_percent(100)
         self._config.set(str(config))
 

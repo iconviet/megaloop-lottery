@@ -87,40 +87,6 @@ class Megaloop(Install, Migrate):
     
     ###########################################################################
 
-    @external
-    def set_config(self, json:str):
-        config = Config(json)
-        open_draw = self._lottery.open_draw
-        open_draw.topup = config.draw_topup
-        open_draw.payout_ratio = config.draw_payout_ratio
-        self._lottery.open_draw = open_draw    
-        self._config.set(json)
-
-    @external
-    def next_draw(self):
-        try:
-            open_draw = self._lottery.open_draw
-            if not self._tickets:
-                open_draw.timestamp = self._block.timestamp
-                open_draw.opened_block = self._block.height
-                self._lottery.open_draw = open_draw
-            else:
-                ##################################################
-                balance = self.icx.get_balance(self.address)
-                if balance < open_draw.payout:
-                    raise Exception('not enough ICX balance.')
-                ##################################################
-                winner = self._lottery.pick(self._block)
-                if winner:
-                    address = Address.from_string(winner.address)
-                    self.icx.transfer(address, int(winner.payout))
-                    self._lottery.open(self._block)
-                else:
-                    raise Exception('winner or ticket not found.')
-                ##################################################
-        except Exception as e:
-            revert(f'Unable to proceed to the next draw:{str(e)}')
-
     @payable
     def fallback(self):
         try:
@@ -164,3 +130,49 @@ class Megaloop(Install, Migrate):
                 ###########################################
         except Exception as e:
             revert(f'Transaction failed because: {str(e)}')
+
+    @external
+    def set_config(self, json:str):
+        if json:
+            self._config.set(json)
+            config = Config(self._config.get())
+            open_draw = self._lottery.open_draw
+            open_draw.topup = config.draw_topup
+            open_draw.payout_ratio = config.draw_payout_ratio
+            self._lottery.open_draw = open_draw
+
+    @external
+    def withdraw(self, address:Address, value:int):
+        try:
+            if self.msg.sender == self.owner:
+                balance = self.icx.get_balance(self.address)
+                if balance < value:
+                    raise Exception('not enough ICX balance')
+                self.icx.transfer(address, to_loop(int(value)))
+        except Exception as e:
+            revert(f'Unable to withdraw contract fund:{str(e)}')
+    
+    @external
+    def next_draw(self):
+        try:
+            open_draw = self._lottery.open_draw
+            if not self._tickets:
+                open_draw.timestamp = self._block.timestamp
+                open_draw.opened_block = self._block.height
+                self._lottery.open_draw = open_draw
+            else:
+                #################################################
+                balance = self.icx.get_balance(self.address)
+                if balance < open_draw.payout:
+                    raise Exception('not enough ICX balance')
+                #################################################
+                winner = self._lottery.pick(self._block)
+                if winner:
+                    address = Address.from_string(winner.address)
+                    self.icx.transfer(address, int(winner.payout))
+                    self._lottery.open(self._block)
+                else:
+                    raise Exception('winner or ticket not found')
+                #################################################
+        except Exception as e:
+            revert(f'Unable to proceed the next draw : {str(e)}')

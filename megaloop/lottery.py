@@ -50,10 +50,10 @@ class Lottery(JsonDictDB):
         try:
             open_draw = self.open_draw
             if not self._tickets:
-                raise Exception('empty ticket list.')
+                raise Exception('empty ticket list')
             ticket = open_draw.random(block, self._tickets)
             if not ticket:
-                raise Exception('random ticket not found.')
+                raise Exception('random ticket not found')
             
             winner = self._winners.new()
             winner.played = ticket.value
