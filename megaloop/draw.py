@@ -20,17 +20,18 @@ from .json_base import *
 class Draw(JsonBase):
     
     def __init__(self, json:str=None):
-        self.prize = 0
-        self.promo = 0
+        self.prize = 0 
+        self.promo = 0       
         self.number = 0
-        self.interval = 0
         self.txhash = None
         self.winner = None
-        self.timestamp = 0
+        self.block_count = 0
         self.ticket_count = 0
         self.payout_ratio = 0
         self.opened_block = 0
-        self.picked_block = 0
+        self.closed_block = 0
+        self.opened_timestamp = 0
+        self.closed_timestamp = 0
         super().__init__(json)
     
     @property

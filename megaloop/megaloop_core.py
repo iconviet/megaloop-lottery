@@ -22,10 +22,12 @@ SCORE internal functions
 """
 class MegaloopCore(MegaloopBase):
     
-    def pick_winner(self) -> Winner:
-        ticket = self.pick_ticket(self._tickets)
+    def pick(self) -> Winner:
+        db = self._db
         instant = self._it
+        ticket = self.rand()
         open_draw = self._open_draw
+
         winner = self._winners.create()
         winner.played = ticket.value
         winner.address = ticket.address
@@ -33,30 +35,35 @@ class MegaloopCore(MegaloopBase):
         winner.timestamp = instant.timestamp
         winner.draw_number = open_draw.number
         winner.chance = ticket.value / open_draw.prize
-        return winner
-    
-    def save_winner(self, winner:Winner):
-        instant = self._it
-        self.winner = winner.address
-        self.picked_block = instant.block
-        self.ticket_count = len(self._tickets)
-        if instant.txhash: self.txhash = instant.txhash
+        
         player = self._players[winner.address]
         player.total_payout += winner.payout
+
         self._players.save(player)
         self._winners.save(winner)
-    
-    def init_open_draw(self):
+
+        open_draw.winner = winner.address
+        open_draw.closed_block = instant.block
+        open_draw.closed_timestamp = instant.block
+        open_draw.ticket_count = len(self._tickets)
+        if instant.txhash: open_draw.txhash = instant.txhash
+        open_draw.save_to(db)
+
+        return winner
+
+    def open(self):
         db = self._db
         instant = self._it
-        open_draw = OpenDraw(db)
+        open_draw = self._open_draw
         last_draw = self._draws.get_last()
         open_draw.opened_block = instant.block
+        open_draw.opened_timestamp = instant.timestamp
         open_draw.number = 1000 if not last_draw else last_draw.number + 1
-        self._open_draw = open_draw
+        open_draw.save_to(db)
 
-    def pick_ticket(self, tickets:Tickets):
+    def rand(self):
         instant = self._it
+        tickets = self._tickets
         open_draw = self._open_draw
         chances = [ticket.value / open_draw.prize for ticket in tickets]
         seed = f'{str(instant)}_{str(open_draw.prize)}_{str(len(tickets))}'

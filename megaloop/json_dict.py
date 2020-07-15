@@ -33,7 +33,6 @@ class JsonDictDB(IterableDictDB):
         for value in self.values():
             yield self._type(value)
     
-    
     def __setitem__(self, key, value):
         super().__setitem__(key, str(value))
 

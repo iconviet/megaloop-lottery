@@ -27,10 +27,10 @@ class MegaloopInstall(MegaloopCore):
         db = self._db
         draw_conf = self._draw_conf
         draw_conf.promo = 0
-        draw_conf.interval = 43200
+        draw_conf.block_count = 43200
         draw_conf.payout_ratio = to_percent(100)
         draw_conf.save_to(db)
-        self.init_open_draw()
+        self.open()
         sponsor = self._sponsors.create()
         sponsor.address = str(self.owner)
         self._sponsors[sponsor.address] = sponsor
