@@ -34,7 +34,7 @@ class IterableDictDB(object):
         self._values = DictDB(f'{self._name}_values', db, value_type)
         self._db = db
 
-    def __iter__(self):
+    def _iter__(self):
         for key in self._keys:
             yield key, self._values[key]
 

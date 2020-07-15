@@ -93,8 +93,8 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
     @payable
     def fallback(self):
         try:
-            db = self.__db
-            instant = self.__it
+            db = self._db
+            instant = self._it
             value = self.msg.value
             open_draw = self._open_draw
             address = str(self.msg.sender)
@@ -154,8 +154,8 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
     @external
     def next_draw(self):
         try:
-            db = self.__db
-            instant = self.__it
+            db = self._db
+            instant = self._it
             open_draw = self._open_draw
             if not self._tickets:
                 open_draw.opened_block = instant.block

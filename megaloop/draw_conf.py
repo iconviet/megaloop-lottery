@@ -29,5 +29,5 @@ class DrawConf(JsonBase):
     def __init__(self, db:IconScoreDatabase):
         self.promo = 0
         self.interval = 0
-        self.payout_ratio = 0    
+        self.payout_ratio = 0
         super().__init__(VarDB(DRAW_CONF_VAR, db, str).get())

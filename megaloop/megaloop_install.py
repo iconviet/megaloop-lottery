@@ -24,7 +24,7 @@ class MegaloopInstall(MegaloopCore):
     
     def on_install(self):
         super().on_install()
-        db = self.__db
+        db = self._db
         draw_conf = self._draw_conf
         draw_conf.promo = 0
         draw_conf.interval = 43200

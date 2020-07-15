@@ -28,4 +28,4 @@ class JsonBase(object):
         return json_dumps(self.__dict__)
 
     def load(self, json:str):
-        self.__dict__ = json_loads(json)
+        if json: self.__dict__.update(json_loads(json))

@@ -35,10 +35,11 @@ Base class for main SCORE
 class MegaloopBase(IconScoreBase):
     
     @property
-    def __it(self) -> Instant:
+    def _it(self) -> Instant:
         return Instant(self)
             
     def __init__(self, db: IconScoreDatabase):
+        self._db = db
         super().__init__(db)
         self._draws = Draws(db)
         self._tickets = Tickets(db)

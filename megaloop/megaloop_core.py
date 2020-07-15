@@ -24,7 +24,7 @@ class MegaloopCore(MegaloopBase):
     
     def pick_winner(self) -> Winner:
         ticket = self.pick_ticket(self._tickets)
-        instant = self.__it
+        instant = self._it
         open_draw = self._open_draw
         winner = self._winners.create()
         winner.played = ticket.value
@@ -36,7 +36,7 @@ class MegaloopCore(MegaloopBase):
         return winner
     
     def save_winner(self, winner:Winner):
-        instant = self.__it
+        instant = self._it
         self.winner = winner.address
         self.picked_block = instant.block
         self.ticket_count = len(self._tickets)
@@ -47,8 +47,8 @@ class MegaloopCore(MegaloopBase):
         self._winners.save(winner)
     
     def init_open_draw(self):
-        db = self.__db
-        instant = self.__it
+        db = self._db
+        instant = self._it
         open_draw = OpenDraw(db)
         last_draw = self._draws.get_last()
         open_draw.opened_block = instant.block
@@ -56,7 +56,7 @@ class MegaloopCore(MegaloopBase):
         self._open_draw = open_draw
 
     def pick_ticket(self, tickets:Tickets):
-        instant = self.__it
+        instant = self._it
         open_draw = self._open_draw
         chances = [ticket.value / open_draw.prize for ticket in tickets]
         seed = f'{str(instant)}_{str(open_draw.prize)}_{str(len(tickets))}'
