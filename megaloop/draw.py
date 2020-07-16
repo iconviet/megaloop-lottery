@@ -20,10 +20,10 @@ from .json_base import *
 class Draw(JsonBase):
     
     def __init__(self, json:str=None):
+        self.block = 0
         self.prize = 0 
         self.promo = 0
-        self.block = 0
-        self.number = 0
+        self.number = None
         self.winner = None
         self.timestamp = 0
         self.block_count = 0
@@ -32,9 +32,9 @@ class Draw(JsonBase):
         super().__init__(json)
     
     @property
-    def total(self) -> int:
-        return self.prize + self.promo
+    def total(self):
+        return float(self.prize + self.promo)
 
     @property
-    def payout(self) -> int:
-        return int(self.total * self.payout_ratio)
+    def payout(self):
+        return float(self.total * self.payout_ratio)

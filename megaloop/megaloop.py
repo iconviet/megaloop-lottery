@@ -38,7 +38,7 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
 
     @external
     def set_draw_conf(self, json:str):
-        self._draw_conf.fill(json)
+        self._draw_conf.load(json)
         self._draw_conf.save(self._db)
     
     @external(readonly=True)
@@ -61,7 +61,7 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
         if not ticket:
             return None
         open_draw = self._open_draw
-        ticket.chance = ticket.value / open_draw.prize
+        ticket.chance = ticket.amount / open_draw.prize
         return str(ticket)
 
     @external(readonly=True)
@@ -90,7 +90,7 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
     def get_tickets(self) -> str:
         open_draw = self._open_draw
         def calculate_chance(ticket:Ticket):
-            ticket.chance = ticket.value / open_draw.prize
+            ticket.chance = ticket.amount / open_draw.prize
             return ticket
         return [str(calculate_chance(ticket)) for ticket in self._tickets]
     
@@ -100,12 +100,12 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
     def fallback(self):
         try:
             db = self._db
-            instant = self._it
-            value = self.msg.value
+            instant = self._it            
             tickets = self._tickets
             players = self._players
             sponsors = self._sponsors
             open_draw = self._open_draw
+            value = icx(self.msg.value)
             address = str(self.msg.sender)
             if value:
                 ##############################################
@@ -127,10 +127,10 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
                 ##############################################
                 ticket = tickets[address]
                 if ticket:
-                    ticket.value += value
+                    ticket.amount += value
                 else:
                     ticket = tickets.create()
-                    ticket.value = value
+                    ticket.amount = value
                     ticket.address = str(address)
                     ticket.draw_number = str(open_draw.number)
                 ticket.timestamp = instant.timestamp
@@ -146,13 +146,13 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
             revert(f'Unable to process transaction: {str(e)}')
 
     @external
-    def withdraw(self, address:Address, value:int):
+    def withdraw(self, address:Address, amount:str):
         try:
             if self.msg.sender == self.owner:
                 balance = self.icx.get_balance(self.address)
-                if balance < value:
+                if balance < loop(float(amount)):
                     raise Exception('not enough ICX balance')
-                self.icx.transfer(address, to_loop(int(value)))
+                self.icx.transfer(address, loop(float(amount)))
         except Exception as e:
             revert(f'Unable to withdraw contract fund:{str(e)}')
     
@@ -167,19 +167,19 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
                 open_draw.timestamp = instant.timestamp
                 open_draw.save(db)
             else:
-                #################################################
+                ###############################d####################
                 balance = self.icx.get_balance(self.address)
-                if balance < open_draw.payout:
+                if balance < loop(open_draw.payout):
                     raise Exception('not enough ICX balance')
-                #################################################
+                ###################################################
                 winner = self.pick_winner()
                 if winner:
                     address = Address.from_string(winner.address)
-                    self.icx.transfer(address,int(winner.payout))
+                    self.icx.transfer(address, int(loop(winner.payout)))
                     self._draws.save(self._open_draw)
                     self.open_draw()
                 else:
                     raise Exception('winner or ticket not found')
-                #################################################
+                ###################################################
         except Exception as e:
             revert(f'Unable to proceed the next draw : {str(e)}')

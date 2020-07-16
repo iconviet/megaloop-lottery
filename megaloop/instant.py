@@ -23,15 +23,15 @@ Instant information
 class Instant(object):
      
    @property
-   def block(self) -> int:
+   def block(self):
       return self._block
 
    @property
-   def txhash(self) -> str:
+   def txhash(self):
       return self._txhash
 
    @property
-   def timestamp(self) -> int:
+   def timestamp(self):
       return self._timestamp
    
    def __repr__(self):

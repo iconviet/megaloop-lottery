@@ -25,9 +25,9 @@ from .draw_conf import *
 from .open_draw import *
 from iconservice import *
 
-def to_loop(icx:int) -> int: return icx * 10 ** 18
-def to_icx(loop:int) -> float: return loop / 10 ** 18
-def to_percent(value:int) -> float: return value / 100
+def loop(icx:float): return int(icx * 10 ** 18)
+def icx(loop:int): return float(loop / 10 ** 18)
+def percent(factor:int): return float(factor / 100)
 
 """
 Base class for main SCORE
@@ -35,7 +35,7 @@ Base class for main SCORE
 class MegaloopBase(IconScoreBase):
     
     @property
-    def _it(self) -> Instant:
+    def _it(self):
         return Instant(self)
             
     def __init__(self, db: IconScoreDatabase):

@@ -26,9 +26,9 @@ class MegaloopInstall(MegaloopCore):
         super().on_install()
         
         draw_conf = self._draw_conf
+        draw_conf.promo = 1.2345
         draw_conf.block_count = 150
-        draw_conf.promo = to_loop(10)
-        draw_conf.payout_ratio = to_percent(50)
+        draw_conf.payout_ratio = percent(100)
         draw_conf.save(self._db)
         
         sponsor = self._sponsors.create()

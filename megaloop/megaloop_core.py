@@ -22,7 +22,7 @@ SCORE internal functions
 """
 class MegaloopCore(MegaloopBase):
     
-    def pick_winner(self) -> Winner:
+    def pick_winner(self):
         db = self._db
         instant = self._it
         players = self._players
@@ -31,12 +31,12 @@ class MegaloopCore(MegaloopBase):
         ticket = self.__random_ticket()
 
         winner = winners.create()
-        winner.played = ticket.value
+        winner.played = ticket.amount
         winner.address = ticket.address
         winner.payout = open_draw.payout
         winner.timestamp = instant.timestamp
         winner.draw_number = str(open_draw.number)
-        winner.chance = ticket.value / open_draw.prize
+        winner.chance = ticket.amount / open_draw.prize
         winners.save(winner)
         
         player = players[winner.address]
@@ -52,7 +52,7 @@ class MegaloopCore(MegaloopBase):
         db = self._db
         instant = self._it
         draws = self._draws
-        open_draw = OpenDraw(db)
+        open_draw = OpenDraw()
         last_draw = draws.get_last()
         open_draw.block = instant.block
         open_draw.timestamp = instant.timestamp
@@ -65,7 +65,7 @@ class MegaloopCore(MegaloopBase):
         instant = self._it
         tickets = self._tickets
         open_draw = self._open_draw
-        chances = [ticket.value / open_draw.prize for ticket in tickets]
+        chances = [ticket.amount / open_draw.prize for ticket in tickets]
         seed = f'{str(instant)}_{str(open_draw.prize)}_{str(len(tickets))}'
         random = (int.from_bytes(sha3_256(seed.encode()), 'big') % 100000) / 100000.0
         factor = sum(chances) * random

@@ -26,8 +26,8 @@ class DrawConf(JsonBase):
     def save(self, db:IconScoreDatabase):
         VarDB(DRAW_CONF_VAR, db, str).set(str(self))
 
-    def __init__(self, db:IconScoreDatabase):
-        self.promo = 0       
+    def __init__(self, db:IconScoreDatabase=None):
+        self.promo = 0
         self.block_count = 0
         self.payout_ratio = 0
-        super().__init__(VarDB(DRAW_CONF_VAR, db, str).get())
+        if db: super().__init__(VarDB(DRAW_CONF_VAR, db, str).get())
