@@ -21,7 +21,7 @@ from .json_base import *
 
 class OpenDraw(Draw):
     
-    def save_to(self, db:IconScoreDatabase):
+    def save(self, db:IconScoreDatabase):
         VarDB(OPEN_DRAW_VAR, db, str).set(str(self))
     
     def __init__(self, db:IconScoreDatabase):

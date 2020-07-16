@@ -23,7 +23,7 @@ Draw configuration class
 """
 class DrawConf(JsonBase):
     
-    def save_to(self, db:IconScoreDatabase):
+    def save(self, db:IconScoreDatabase):
         VarDB(DRAW_CONF_VAR, db, str).set(str(self))
 
     def __init__(self, db:IconScoreDatabase):

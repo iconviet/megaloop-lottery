@@ -31,11 +31,16 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
     @external(readonly=True)
     def get_draw_conf(self) -> str:
         return str(self._draw_conf)
-    
+
     @external(readonly=True)
     def get_open_draw(self) -> str:
         return str(self._open_draw)
 
+    @external
+    def set_draw_conf(self, json:str):
+        self._draw_conf.fill(json)
+        self._draw_conf.save(self._db)
+    
     @external(readonly=True)
     def get_last_player(self) -> str:
         player = self._players.get_last()
@@ -135,7 +140,7 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
                 ##############################################
                 open_draw.prize += value
                 open_draw.ticket_count = len(tickets)
-                open_draw.save_to(db)
+                open_draw.save(db)
                 ##############################################
         except Exception as e:
             revert(f'Unable to process transaction: {str(e)}')
@@ -160,7 +165,7 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
             if not self._tickets:
                 open_draw.block = instant.block
                 open_draw.timestamp = instant.timestamp
-                open_draw.save_to(db)
+                open_draw.save(db)
             else:
                 #################################################
                 balance = self.icx.get_balance(self.address)

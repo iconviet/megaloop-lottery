@@ -44,7 +44,7 @@ class MegaloopCore(MegaloopBase):
         players.save(player)
 
         open_draw.winner = winner.address
-        open_draw.save_to(db)
+        open_draw.save(db)
 
         return winner
 
@@ -58,7 +58,7 @@ class MegaloopCore(MegaloopBase):
         open_draw.timestamp = instant.timestamp
         open_draw.fill(VarDB(DRAW_CONF_VAR, db, str).get())
         open_draw.number = str(1000 if not last_draw else int(last_draw.number) + 1)
-        open_draw.save_to(db)
+        open_draw.save(db)
         self._open_draw = open_draw
 
     def __random_ticket(self):
