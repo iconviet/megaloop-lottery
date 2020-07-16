@@ -16,7 +16,7 @@
 
 # pylint: disable=W0614
 from .draw import *
-from .draw_conf import *
+from .consts import *
 from .json_base import *
 
 class OpenDraw(Draw):
@@ -25,7 +25,4 @@ class OpenDraw(Draw):
         VarDB(OPEN_DRAW_VAR, db, str).set(str(self))
     
     def __init__(self, db:IconScoreDatabase):
-        json = VarDB(OPEN_DRAW_VAR, db, str).get()
-        super().__init__(json)
-        if not json:
-            self.load(VarDB(DRAW_CONF_VAR, db, str).get())
+        super().__init__(VarDB(OPEN_DRAW_VAR, db, str).get())

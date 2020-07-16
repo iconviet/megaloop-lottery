@@ -24,13 +24,17 @@ class MegaloopInstall(MegaloopCore):
     
     def on_install(self):
         super().on_install()
+        
         db = self._db
+        
         draw_conf = self._draw_conf
-        draw_conf.promo = 0
-        draw_conf.block_count = 43200
-        draw_conf.payout_ratio = to_percent(100)
+        draw_conf.promo = 10
+        draw_conf.block_count = 150
+        draw_conf.payout_ratio = to_percent(50)
         draw_conf.save_to(db)
-        self.open()
+        
         sponsor = self._sponsors.create()
         sponsor.address = str(self.owner)
-        self._sponsors[sponsor.address] = sponsor
+        self._sponsors.save(sponsor)
+        
+        self.open_draw()

@@ -60,6 +60,11 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
         return str(ticket)
 
     @external(readonly=True)
+    def get_past_tickets(self, draw_number:str) -> str:
+        tickets = Tickets(self._db, draw_number)
+        return [str(ticket) for ticket in tickets]
+    
+    @external(readonly=True)
     def get_last_draw(self) -> str:
         last_draw = self._draws.get_last()
         return None if not last_draw else str(last_draw)
@@ -75,10 +80,6 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
     @external(readonly=True)
     def get_sponsors(self) -> str:
         return [str(sponsor) for sponsor in self._sponsors]
-    
-    @external(readonly=True)
-    def get_past_tickets(self, draw_number:int) -> str:
-        return [str(ticket) for ticket in self._tickets[draw_number]]
     
     @external(readonly=True)
     def get_tickets(self) -> str:
@@ -102,13 +103,13 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
             open_draw = self._open_draw
             address = str(self.msg.sender)
             if value:
-                ###########################################
+                ##############################################
                 if address in sponsors:
                     sponsor = sponsors[address]
                     sponsor.total_promo += value
-                    sponsors[address] = sponsor
+                    sponsors.save(sponsor)
                     return
-                ###########################################
+                ##############################################
                 player = players[address]
                 if player:
                     player.total_played += value
@@ -117,8 +118,8 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
                     player.total_played = value
                     player.address = str(address)
                 player.timestamp = instant.timestamp
-                players[address] = player
-                ###########################################
+                players.save(player)
+                ##############################################
                 ticket = tickets[address]
                 if ticket:
                     ticket.value += value
@@ -126,17 +127,16 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
                     ticket = tickets.create()
                     ticket.value = value
                     ticket.address = str(address)
-                    ticket.draw_number = open_draw.number
-                ticket.last_block = instant.block
+                    ticket.draw_number = str(open_draw.number)
                 ticket.timestamp = instant.timestamp
                 if address in tickets:
-                    del tickets[open_draw.number][address]
-                tickets[open_draw.number][address] = ticket
-                ###########################################
+                    del tickets[address]
+                tickets.save(ticket)
+                ##############################################
                 open_draw.prize += value
                 open_draw.ticket_count = len(tickets)
                 open_draw.save_to(db)
-                ###########################################
+                ##############################################
         except Exception as e:
             revert(f'Unable to process transaction: {str(e)}')
 
@@ -158,8 +158,8 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
             instant = self._it
             open_draw = self._open_draw
             if not self._tickets:
-                open_draw.opened_block = instant.block
-                open_draw.opened_timestamp = instant.timestamp
+                open_draw.block = instant.block
+                open_draw.timestamp = instant.timestamp
                 open_draw.save_to(db)
             else:
                 #################################################
@@ -167,11 +167,12 @@ class Megaloop(MegaloopInstall, MegaloopMigrate):
                 if balance < open_draw.payout:
                     raise Exception('not enough ICX balance')
                 #################################################
-                winner = self.pick()
+                winner = self.pick_winner()
                 if winner:
                     address = Address.from_string(winner.address)
                     self.icx.transfer(address,int(winner.payout))
-                    self.open()
+                    self._draws.save(self._open_draw)
+                    self.open_draw()
                 else:
                     raise Exception('winner or ticket not found')
                 #################################################

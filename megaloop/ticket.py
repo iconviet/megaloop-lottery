@@ -23,6 +23,5 @@ class Ticket(JsonBase):
         self.value = 0
         self.timestamp = 0
         self.address = None
-        self.last_block = 0
-        self.draw_number = 0
+        self.draw_number = None
         super().__init__(json)

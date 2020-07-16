@@ -42,9 +42,9 @@ class MegaloopBase(IconScoreBase):
         self._db = db
         super().__init__(db)
         self._draws = Draws(db)
-        self._tickets = Tickets(db)
         self._players = Players(db)
         self._winners = Winners(db)
         self._sponsors = Sponsors(db)
         self._draw_conf = DrawConf(db)
         self._open_draw = OpenDraw(db)
+        self._tickets = Tickets(db, self._open_draw.number)

@@ -21,8 +21,8 @@ from .json_dict import *
 
 class Tickets(JsonDictDB):
     
-    def __init__(self, db:IconScoreDatabase):
-        super().__init__(TICKETS_DICT, db, Ticket)
-
     def save(self, ticket:Ticket):
-        self[ticket.draw_number][ticket.address] = ticket
+        self[ticket.address] = ticket
+
+    def __init__(self, db:IconScoreDatabase, draw_number:str):
+        super().__init__(f'{TICKETS_DICT}_{draw_number}', db, Ticket)
