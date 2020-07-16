@@ -24,3 +24,5 @@ class MegaloopMigrate(MegaloopCore):
     
     def on_update(self):
         super().on_update()
+
+        self.open_draw()

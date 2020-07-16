@@ -25,4 +25,7 @@ class OpenDraw(Draw):
         VarDB(OPEN_DRAW_VAR, db, str).set(str(self))
     
     def __init__(self, db:IconScoreDatabase=None):
-        if db: super().__init__(VarDB(OPEN_DRAW_VAR, db, str).get())
+        if not db:
+            super().__init__()
+        else:
+            super().__init__(VarDB(OPEN_DRAW_VAR, db, str).get())
