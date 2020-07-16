@@ -17,7 +17,6 @@
 # pylint: disable=W0614
 from .draw import *
 from .consts import *
-from .json_base import *
 
 class OpenDraw(Draw):
     

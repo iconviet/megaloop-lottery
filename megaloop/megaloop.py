@@ -15,14 +15,9 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .megaloop_install import *
-from .megaloop_migrate import *
+from .megaloop_base import *
 
-"""
-Megaloop main SCORE composite
-    * TODO: still kludgy - refactor later
-"""
-class Megaloop(MegaloopInstall, MegaloopMigrate):
+class Megaloop(MegaloopBase):
 
     @external(readonly=True)
     def name(self) -> str:

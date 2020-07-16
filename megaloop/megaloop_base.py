@@ -15,36 +15,24 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .draws import *
-from .instant import *
-from .tickets import *
-from .players import *
-from .winners import *
-from .sponsors import *
-from .draw_conf import *
-from .open_draw import *
-from iconservice import *
+from .megaloop_core import *
 
-def loop(icx:float): return int(icx * 10 ** 18)
-def icx(loop:int): return float(loop / 10 ** 18)
-def percent(factor:int): return float(factor / 100)
-
-"""
-Base class for main SCORE
-"""
-class MegaloopBase(IconScoreBase):
+class MegaloopBase(MegaloopCore):
     
-    @property
-    def _it(self):
-        return Instant(self)
-            
-    def __init__(self, db: IconScoreDatabase):
-        self._db = db
-        super().__init__(db)
-        self._draws = Draws(db)
-        self._players = Players(db)
-        self._winners = Winners(db)
-        self._sponsors = Sponsors(db)
-        self._draw_conf = DrawConf(db)
-        self._open_draw = OpenDraw(db)
-        self._tickets = Tickets(db, self._open_draw.number)
+    def on_update(self):
+        super().on_update()
+
+    def on_install(self):
+        super().on_install()
+        
+        draw_conf = self._draw_conf
+        draw_conf.promo = 1.2345
+        draw_conf.block_count = 150
+        draw_conf.payout_ratio = percent(100)
+        draw_conf.save(self._db)
+        
+        sponsor = self._sponsors.create()
+        sponsor.address = str(self.owner)
+        self._sponsors.save(sponsor)
+        
+        self.open_draw()

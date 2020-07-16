@@ -15,7 +15,6 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .json_base import *
 from iconservice import *
 from .scorelib.iterable_dict import *
 
