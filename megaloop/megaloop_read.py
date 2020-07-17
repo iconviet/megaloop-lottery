@@ -15,11 +15,6 @@ class MegaloopRead(MegaloopBase):
     def get_open_draw(self) -> str:
         return str(self._open_draw)
 
-    @external
-    def set_draw_conf(self, json:str):
-        self._draw_conf.load(json)
-        self._draw_conf.save(self._db)
-    
     @external(readonly=True)
     def get_last_player(self) -> str:
         player = self._players.get_last()

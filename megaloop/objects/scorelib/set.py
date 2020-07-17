@@ -1,6 +1,6 @@
 # pylint: disable=W0614
 from iconservice import *
-from bag import *
+from .bag import *
 
 class SetDB(BagDB):
     """

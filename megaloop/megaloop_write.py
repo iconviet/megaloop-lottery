@@ -4,15 +4,16 @@ from .megaloop_base import *
 class MegaloopWrite(MegaloopBase):
 
     @external
+    def set_draw_conf(self, json:str):
+        self._draw_conf.load(json)
+        self._open_draw.fill(json)
+        self._draw_conf.save(self._db)
+        self._open_draw.save(self._db)
+    
+    @external
     def withdraw(self, address:Address, amount:str):
-        try:
-            if self.msg.sender == self.owner:
-                balance = self.icx.get_balance(self.address)
-                if balance < loop(float(amount)):
-                    raise Exception('not enough ICX balance')
-                self.icx.transfer(address, loop(float(amount)))
-        except Exception as e:
-            revert(f'Unable to withdraw contract fund:{str(e)}')
+        if self.msg.sender == self.owner:
+            self.icx.transfer(address, loop(float(amount)))
     
     @external
     def next_draw(self):

@@ -1,6 +1,6 @@
 # pylint: disable=W0614
 from iconservice import *
-from consts import *
+from .consts import *
 
 class ItemNotFound(Exception):
     """ Cannot find an entry in the collection """
