@@ -33,7 +33,7 @@ class MegaloopBase(IconScoreBase):
 
     def pick_winner(self):
         db = self._db
-        instant = self._it
+        it = self._it
         players = self._players
         winners = self._winners
         open_draw = self._open_draw
@@ -42,8 +42,8 @@ class MegaloopBase(IconScoreBase):
         winner = winners.create()
         winner.played = ticket.amount
         winner.address = ticket.address
-        winner.payout = open_draw.payout
-        winner.timestamp = instant.timestamp
+        winner.timestamp = it.timestamp
+        winner.payout = open_draw.payout        
         winner.draw_number = str(open_draw.number)
         winner.chance = ticket.amount / open_draw.prize
         winners.save(winner)
@@ -59,23 +59,23 @@ class MegaloopBase(IconScoreBase):
 
     def open_draw(self):
         db = self._db
-        instant = self._it
+        it = self._it
         draws = self._draws
         open_draw = OpenDraw()
+        open_draw.block = it.block
         last_draw = draws.get_last()
-        open_draw.block = instant.block
-        open_draw.timestamp = instant.timestamp
+        open_draw.timestamp = it.timestamp
         open_draw.fill(VarDB(DRAW_CONF_VAR, db, str).get())
         open_draw.number = str(1000 if not last_draw else int(last_draw.number) + 1)
         open_draw.save(db)
         self._open_draw = open_draw
 
     def __random_ticket(self):
-        instant = self._it
+        it = self._it
         tickets = self._tickets
         open_draw = self._open_draw
         chances = [ticket.amount / open_draw.prize for ticket in tickets]
-        seed = f'{str(instant)}_{str(open_draw.prize)}_{str(len(tickets))}'
+        seed = f'{str(it)}_{str(open_draw.prize)}_{str(len(tickets))}'
         random = (int.from_bytes(sha3_256(seed.encode()), 'big') % 100000) / 100000.0
         factor = sum(chances) * random
         for index, chance in enumerate(chances):

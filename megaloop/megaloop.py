@@ -25,42 +25,42 @@ class Megaloop(MegaloopTask, MegaloopRead, MegaloopWrite):
     def fallback(self):
         try:
             db = self._db
-            instant = self._it
+            it = self._it
             tickets = self._tickets
             players = self._players
             sponsors = self._sponsors
             open_draw = self._open_draw
             value = icx(self.msg.value)
-            address = str(self.msg.sender)
+            sender = str(self.msg.sender)
             if value:
                 ##############################################
-                if address in sponsors:
-                    sponsor = sponsors[address]
+                if sender in sponsors:
+                    sponsor = sponsors[sender]
                     sponsor.total_promo += value
                     sponsors.save(sponsor)
                     return
                 ##############################################
-                player = players[address]
+                player = players[sender]
                 if player:
                     player.total_played += value
                 else:
                     player = players.create()
                     player.total_played = value
-                    player.address = str(address)
-                player.timestamp = instant.timestamp
+                    player.address = str(sender)
+                player.timestamp = it.timestamp
                 players.save(player)
                 ##############################################
-                ticket = tickets[address]
+                ticket = tickets[sender]
                 if ticket:
                     ticket.amount += value
                 else:
                     ticket = tickets.create()
                     ticket.amount = value
-                    ticket.address = str(address)
+                    ticket.address = str(sender)
                     ticket.draw_number = str(open_draw.number)
-                ticket.timestamp = instant.timestamp
-                if address in tickets:
-                    del tickets[address]
+                ticket.timestamp = it.timestamp
+                if sender in tickets:
+                    del tickets[sender]
                 tickets.save(ticket)
                 ##############################################
                 open_draw.prize += value

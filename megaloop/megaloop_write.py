@@ -19,11 +19,11 @@ class MegaloopWrite(MegaloopBase):
     def next_draw(self):
         try:
             db = self._db
-            instant = self._it
+            it = self._it
             open_draw = self._open_draw
             if not self._tickets:
-                open_draw.block = instant.block
-                open_draw.timestamp = instant.timestamp
+                open_draw.block = it.block
+                open_draw.timestamp = it.timestamp
                 open_draw.save(db)
             else:
                 ###############################d####################
