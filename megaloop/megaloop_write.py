@@ -4,9 +4,9 @@ from .megaloop_base import *
 class MegaloopWrite(MegaloopBase):
 
     @external
-    def set_draw_conf(self, json:str):
-        self._draw_conf.load(json)
-        self._open_draw.fill(json)
+    def set_draw_conf(self, text:str):
+        self._draw_conf.load(text)
+        self._open_draw.fill(text)
         self._draw_conf.save(self._db)
         self._open_draw.save(self._db)
     

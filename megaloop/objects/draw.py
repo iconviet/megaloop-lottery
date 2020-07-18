@@ -3,7 +3,7 @@ from .json_base import *
 
 class Draw(JsonBase):
     
-    def __init__(self, json:str=None):
+    def __init__(self, text:str=None):
         self.block = 0
         self.prize = 0 
         self.promo = 0
@@ -15,7 +15,7 @@ class Draw(JsonBase):
         self.payout_ratio = 0
         self.seeding_limit = 0
         self.revenue_limit = 0
-        super().__init__(json)
+        super().__init__(text)
     
     @property
     def total(self):

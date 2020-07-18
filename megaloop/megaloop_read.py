@@ -40,15 +40,6 @@ class MegaloopRead(MegaloopBase):
         return None if not last_draw else str(last_draw)
 
     @external(readonly=True)
-    def get_tickets(self, skip:int=0, take:int=0, desc:bool=False) -> str:
-        tickets = self._tickets
-        open_draw = self._open_draw
-        def calculate_chance(ticket:Ticket):
-            ticket.chance = ticket.amount / open_draw.prize
-            return ticket
-        return [str(calculate_chance(ticket)) for ticket in tickets]
-
-    @external(readonly=True)
     def get_past_draws(self, skip:int=0, take:int=0, desc:bool=False) -> str:
         return self.__filter_items_from_json_dict(self._draws, skip, take, desc)
 
@@ -69,12 +60,23 @@ class MegaloopRead(MegaloopBase):
         tickets = Tickets(self._db, draw_number)
         return [str(ticket) for ticket in tickets]
 
-    def __filter_items_from_json_dict(self, json_dict:JsonDictDB, skip:int, take:int, desc:bool) -> list:
+    @external(readonly=True)
+    def get_tickets(self, skip:int=0, take:int=0, desc:bool=False) -> str:
+        open_draw = self._open_draw
+        def calculate_chance(ticket:Ticket):
+            ticket.chance = ticket.amount / open_draw.prize
+            return ticket
+        return self.__filter_items_from_json_dict(self._tickets, skip, take, desc, calculate_chance)
+
+    def __filter_items_from_json_dict(self, json_dict:JsonDictDB, skip:int, take:int, desc:bool, work=None) -> list:
         sign = 1
         if desc:
             sign = -1
             skip -= sign
         take = skip + take
-        if take > len(json_dict): return str([])
+        def slip(json:JsonBase):
+            return json
+        func = slip if not work else work
+        if take > len(json_dict): take = len(json_dict)
         if take == 0: return [str(i) for i in json_dict]
-        return [str(json_dict.get(i * sign)) for i in range(skip, take)]
+        return [str(func(json_dict.get(i * sign))) for i in range(skip, take)]
