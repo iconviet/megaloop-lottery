@@ -26,10 +26,6 @@ class MegaloopRead(MegaloopBase):
         return None if not winner else str(winner)
 
     @external(readonly=True)
-    def get_past_draws(self) -> str:
-        return [str(draw) for draw in self._draws]
-
-    @external(readonly=True)
     def get_last_ticket(self) -> str:
         ticket = self._tickets.get_last()
         if not ticket:
@@ -39,31 +35,46 @@ class MegaloopRead(MegaloopBase):
         return str(ticket)
 
     @external(readonly=True)
-    def get_past_tickets(self, draw_number:str) -> str:
-        tickets = Tickets(self._db, draw_number)
-        return [str(ticket) for ticket in tickets]
-    
-    @external(readonly=True)
     def get_last_draw(self) -> str:
         last_draw = self._draws.get_last()
         return None if not last_draw else str(last_draw)
 
     @external(readonly=True)
-    def get_players(self) -> str:
-        return [str(player) for player in self._players]
-    
-    @external(readonly=True)
-    def get_past_winners(self) -> str:
-        return [str(winner) for winner in self._winners]
-
-    @external(readonly=True)
-    def get_sponsors(self) -> str:
-        return [str(sponsor) for sponsor in self._sponsors]
-    
-    @external(readonly=True)
-    def get_tickets(self) -> str:
+    def get_tickets(self, skip:int=0, take:int=0, desc:bool=False) -> str:
+        tickets = self._tickets
         open_draw = self._open_draw
         def calculate_chance(ticket:Ticket):
             ticket.chance = ticket.amount / open_draw.prize
             return ticket
-        return [str(calculate_chance(ticket)) for ticket in self._tickets]
+        return [str(calculate_chance(ticket)) for ticket in tickets]
+
+    @external(readonly=True)
+    def get_past_draws(self, skip:int=0, take:int=0, desc:bool=False) -> str:
+        return self.__filter_items_from_json_dict(self._draws, skip, take, desc)
+
+    @external(readonly=True)
+    def get_players(self, skip:int=0, take:int=0, desc:bool=False) -> str:
+        return self.__filter_items_from_json_dict(self._players, skip, take, desc)
+
+    @external(readonly=True)
+    def get_past_winners(self, skip:int=0, take:int=0, desc:bool=False) -> str:
+        return self.__filter_items_from_json_dict(self._winners, skip, take, desc)
+
+    @external(readonly=True)
+    def get_sponsors(self, skip:int=0, take:int=0, desc:bool=False) -> str:
+        return self.__filter_items_from_json_dict(self._sponsors, skip, take, desc)
+
+    @external(readonly=True)
+    def get_past_tickets(self, draw_number:str, skip:int=0, take:int=0, desc:bool=False) -> str:
+        tickets = Tickets(self._db, draw_number)
+        return [str(ticket) for ticket in tickets]
+
+    def __filter_items_from_json_dict(self, json_dict:JsonDictDB, skip:int, take:int, desc:bool) -> list:
+        sign = 1
+        if desc:
+            sign = -1
+            skip -= sign
+        take = skip + take
+        if take > len(json_dict): return str([])
+        if take == 0: return [str(i) for i in json_dict]
+        return [str(json_dict.get(i * sign)) for i in range(skip, take)]
