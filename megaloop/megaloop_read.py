@@ -70,9 +70,7 @@ class MegaloopRead(MegaloopBase):
 
     def __in_range_order(self, json_dict:JsonDictDB, skip:int, take:int, desc:bool, work=None) -> list:
         sign = 1
-        if desc:
-            sign = -1
-            skip -= sign
+        if desc: sign = -1
         take = skip + take
         def lazy(json:JsonBase):
             return json
