@@ -17,11 +17,11 @@ class JsonDictDB(IterableDictDB):
         super().__setitem__(key, str(value))
 
     def get_last(self):
-        return None if not self else self.get(-1)
+        return self.get(-1) if self else None
 
     def __getitem__(self, key):
         json = super().__getitem__(key)
-        return None if not json else self._type(json)
+        return self._type(json) if json else None
 
     def get(self, index:int):
         return self._type(self._values[self._keys[index]])

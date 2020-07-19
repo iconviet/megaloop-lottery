@@ -18,26 +18,25 @@ class MegaloopRead(MegaloopBase):
     @external(readonly=True)
     def get_last_player(self) -> str:
         player = self._players.get_last()
-        return None if not player else str(player)
+        return str(player) if player else None
     
     @external(readonly=True)
     def get_last_winner(self) -> str:
         winner = self._winners.get_last()
-        return None if not winner else str(winner)
-
-    @external(readonly=True)
-    def get_last_ticket(self) -> str:
-        ticket = self._tickets.get_last()
-        if not ticket:
-            return None
-        open_draw = self._open_draw
-        ticket.chance = ticket.amount / open_draw.prize
-        return str(ticket)
+        return str(winner) if winner else None
 
     @external(readonly=True)
     def get_last_draw(self) -> str:
         last_draw = self._draws.get_last()
-        return None if not last_draw else str(last_draw)
+        return str(last_draw) if last_draw else None
+
+    @external(readonly=True)
+    def get_last_ticket(self) -> str:
+        ticket = self._tickets.get_last()
+        if not ticket: return None
+        open_draw = self._open_draw
+        ticket.chance = ticket.amount / open_draw.prize
+        return str(ticket)
 
     @external(readonly=True)
     def get_players(self, skip:int=0, take:int=0, desc:bool=False) -> str:
@@ -79,4 +78,4 @@ class MegaloopRead(MegaloopBase):
         func = lazy if not work else work
         if take == 0: return [str(i) for i in json_dict]
         if take >= len(json_dict): take = len(json_dict) + 1
-        return [str(func(json_dict.get(i))) for i in range(skip * sign, take * sign, sign)]
+        return [str(func(json_dict.get(i * sign))) for i in range(skip, take)]
