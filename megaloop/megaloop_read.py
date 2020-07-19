@@ -59,6 +59,7 @@ class MegaloopRead(MegaloopBase):
     def get_past_draws(self, skip:int=0, take:int=0, desc:bool=False) -> str:
         return self.__in_range_order(self._draws, skip, take, desc)
 
+    @external(readonly=True)
     def get_past_winners(self, skip:int=0, take:int=0, desc:bool=False) -> str:
         return self.__in_range_order(self._winners, skip, take, desc)
 
