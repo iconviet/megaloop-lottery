@@ -5,6 +5,7 @@ class Player(JsonBase):
 
     def __init__(self, text:str=None):
         self.name = ''
+        self.tx_count = 0
         self.timestamp = 0
         self.address = None
         self.total_played = 0

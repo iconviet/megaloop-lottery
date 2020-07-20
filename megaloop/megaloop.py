@@ -41,23 +41,22 @@ class Megaloop(MegaloopTask, MegaloopRead, MegaloopWrite):
                     return
                 ##############################################
                 player = players[sender]
-                if player:
-                    player.total_played += value
-                else:
+                if not player:
                     player = players.create()
                     player.total_played = value
                     player.address = str(sender)
+                player.tx_count += 1
+                player.total_played += value
                 player.timestamp = it.timestamp
                 players.save(player)
                 ##############################################
                 ticket = tickets[sender]
-                if ticket:
-                    ticket.amount += value
-                else:
+                if not ticket:
                     ticket = tickets.create()
-                    ticket.amount = value
                     ticket.address = str(sender)
                     ticket.draw_number = str(open_draw.number)
+                ticket.tx_count += 1
+                ticket.amount += value
                 ticket.timestamp = it.timestamp
                 if sender in tickets:
                     del tickets[sender]

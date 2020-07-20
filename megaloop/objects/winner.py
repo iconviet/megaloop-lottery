@@ -6,6 +6,7 @@ class Winner(JsonBase):
         self.played = 0
         self.chance = 0
         self.payout = 0
+        self.tx_count = 0
         self.timestamp = 0
         self.address = None
         self.draw_number = None

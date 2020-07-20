@@ -43,7 +43,8 @@ class MegaloopBase(IconScoreBase):
         winner.played = ticket.amount
         winner.address = ticket.address
         winner.timestamp = it.timestamp
-        winner.payout = open_draw.payout        
+        winner.payout = open_draw.payout
+        winner.tx_count = ticket.tx_count
         winner.draw_number = str(open_draw.number)
         winner.chance = ticket.amount / open_draw.prize
         winners.save(winner)
@@ -66,7 +67,7 @@ class MegaloopBase(IconScoreBase):
         last_draw = draws.get_last()
         open_draw.timestamp = it.timestamp
         open_draw.fill(VarDB(DRAW_CONF_VAR, db, str).get())
-        open_draw.number = str(1000 if not last_draw else int(last_draw.number) + 1)
+        open_draw.number = str(int(last_draw.number) + 1 if last_draw else 1000)
         open_draw.save(db)
         self._open_draw = open_draw
 
