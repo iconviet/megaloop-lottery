@@ -33,39 +33,45 @@ class MegaloopRead(MegaloopBase):
     @external(readonly=True)
     def get_last_ticket(self) -> str:
         ticket = self._tickets.get_last()
-        if not ticket: return None
-        open_draw = self._open_draw
-        ticket.chance = ticket.amount / open_draw.prize
-        return str(ticket)
-
-    @external(readonly=True)
-    def get_players(self, skip:int=0, take:int=0, desc:bool=False) -> str:
-        return self.__in_range_order(self._players, skip, take, desc)
-
-    @external(readonly=True)
-    def get_tickets(self, skip:int=0, take:int=0, desc:bool=False) -> str:
-        open_draw = self._open_draw
-        def work(ticket:Ticket):
+        if ticket:
+            open_draw = self._open_draw
             ticket.chance = ticket.amount / open_draw.prize
-            return ticket
-        return self.__in_range_order(self._tickets, skip, take, desc, work)
+            return str(ticket)
 
     @external(readonly=True)
-    def get_sponsors(self, skip:int=0, take:int=0, desc:bool=False) -> str:
-        return self.__in_range_order(self._sponsors, skip, take, desc)
+    def get_past_draws(self, skip:int, take:int, desc:bool) -> str:
+        if skip and take and desc:
+            return self.__in_range_order(self._draws, skip, take, desc)
 
     @external(readonly=True)
-    def get_past_draws(self, skip:int=0, take:int=0, desc:bool=False) -> str:
-        return self.__in_range_order(self._draws, skip, take, desc)
+    def get_past_winners(self, skip:int, take:int, desc:bool) -> str:
+        if skip and take and desc:
+            return self.__in_range_order(self._winners, skip, take, desc)
 
     @external(readonly=True)
-    def get_past_winners(self, skip:int=0, take:int=0, desc:bool=False) -> str:
-        return self.__in_range_order(self._winners, skip, take, desc)
+    def get_players(self, skip:int, take:int, desc:bool) -> str:
+        if skip and take and desc:
+            return self.__in_range_order(self._players, skip, take, desc)
 
     @external(readonly=True)
-    def get_past_tickets(self, draw_number:str, skip:int=0, take:int=0, desc:bool=False) -> str:
-        tickets = Tickets(self._db, draw_number)
-        return [str(ticket) for ticket in tickets]
+    def get_sponsors(self, skip:int, take:int, desc:bool) -> str:
+        if skip and take and desc:
+            return self.__in_range_order(self._sponsors, skip, take, desc)
+
+    @external(readonly=True)
+    def get_tickets(self, skip:int, take:int, desc:bool) -> str:
+        if skip and take and desc:
+            open_draw = self._open_draw
+            def work(ticket:Ticket):
+                ticket.chance = ticket.amount / open_draw.prize
+                return ticket
+            return self.__in_range_order(self._tickets, skip, take, desc, work)
+
+    @external(readonly=True)
+    def get_past_tickets(self, draw_number:str, skip:int, take:int, desc:bool) -> str:
+        if skip and take and desc:
+            tickets = Tickets(self._db, draw_number)
+            return [str(ticket) for ticket in tickets]
 
     def __in_range_order(self, json_dict:JsonDictDB, skip:int, take:int, desc:bool, work=None) -> list:
         sign = 1
