@@ -15,11 +15,10 @@
 # limitations under the License.
 
 # pylint: disable=W0614
-from .megaloop_task import *
 from .megaloop_read import *
 from .megaloop_write import *
 
-class Megaloop(MegaloopTask, MegaloopRead, MegaloopWrite):
+class Megaloop(MegaloopRead, MegaloopWrite):
 
     @payable
     def fallback(self):
