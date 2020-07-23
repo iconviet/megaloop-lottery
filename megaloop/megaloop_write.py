@@ -3,6 +3,16 @@ from .megaloop_base import *
 
 class MegaloopWrite(MegaloopBase):
 
+    @property
+    def _it(self):
+        return Instant(self)
+    
+    def on_update(self):
+        super().on_update()
+        '''
+        migration / maintenance code go here
+        '''
+
     def on_install(self):
         super().on_install()
         

@@ -15,15 +15,8 @@ def percent(factor:int): return float(factor / 100)
 
 class MegaloopBase(IconScoreBase):
     
-    @property
-    def _it(self):
-        return Instant(self)
-    
     def on_update(self):
         super().on_update()
-        '''
-        migration / maintenance code go here
-        '''
 
     def on_install(self):
         super().on_install()
